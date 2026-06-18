@@ -7,6 +7,7 @@ export default function Settings() {
     supportEmail: '',
     supportPhone: '',
     googleMapsApiKey: '',
+    mapDefaultZoom: 7,
     maintenanceMode: false,
     maintenanceMessage: '',
   });
@@ -26,6 +27,7 @@ export default function Settings() {
           supportEmail: s.supportEmail || '',
           supportPhone: s.supportPhone || '',
           googleMapsApiKey: s.googleMapsApiKey || '',
+          mapDefaultZoom: s.mapDefaultZoom ?? 7,
           maintenanceMode: !!s.maintenanceMode,
           maintenanceMessage: s.maintenanceMessage || '',
         }));
@@ -43,7 +45,10 @@ export default function Settings() {
     setError('');
     setBusy(true);
     try {
-      const payload = { maintenanceMode: form.maintenanceMode };
+      const payload = {
+        maintenanceMode: form.maintenanceMode,
+        mapDefaultZoom: Number(form.mapDefaultZoom) || 7,
+      };
       ['siteName', 'supportEmail', 'supportPhone', 'googleMapsApiKey', 'maintenanceMessage'].forEach(
         (k) => {
           if (form[k]) payload[k] = form[k];
@@ -77,6 +82,15 @@ export default function Settings() {
 
         <label>Google Maps API key</label>
         <input value={form.googleMapsApiKey} onChange={set('googleMapsApiKey')} />
+
+        <label>Map default zoom (1 = country, 20 = building)</label>
+        <input
+          type="number"
+          min={1}
+          max={20}
+          value={form.mapDefaultZoom}
+          onChange={set('mapDefaultZoom')}
+        />
 
         <label className="checkbox">
           <input type="checkbox" checked={form.maintenanceMode} onChange={set('maintenanceMode')} />

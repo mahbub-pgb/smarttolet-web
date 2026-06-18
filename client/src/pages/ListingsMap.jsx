@@ -8,7 +8,7 @@ import { MAPS_LIBRARIES, MAPS_LOADER_ID, DEFAULT_CENTER } from '../components/ma
 
 const containerStyle = { width: '100%', height: 'calc(100vh - 200px)', minHeight: '420px', borderRadius: '10px' };
 
-function MapInner({ apiKey, listings }) {
+function MapInner({ apiKey, listings, zoom }) {
   const { isLoaded, loadError } = useJsApiLoader({
     id: MAPS_LOADER_ID,
     googleMapsApiKey: apiKey,
@@ -16,16 +16,16 @@ function MapInner({ apiKey, listings }) {
   });
   const [active, setActive] = useState(null);
 
-  // Fit the map to all markers once it loads.
+  // Center on the listings but use the admin-configured zoom level.
   const onLoad = useCallback(
     (map) => {
       if (!listings.length) return;
       const bounds = new window.google.maps.LatLngBounds();
       listings.forEach((l) => bounds.extend({ lat: l.geo.coordinates[1], lng: l.geo.coordinates[0] }));
-      map.fitBounds(bounds);
-      if (listings.length === 1) map.setZoom(15);
+      map.setCenter(bounds.getCenter());
+      map.setZoom(zoom);
     },
-    [listings],
+    [listings, zoom],
   );
 
   if (loadError) return <div className="alert error">Failed to load Google Maps.</div>;
@@ -35,7 +35,7 @@ function MapInner({ apiKey, listings }) {
     <GoogleMap
       mapContainerStyle={containerStyle}
       center={DEFAULT_CENTER}
-      zoom={7}
+      zoom={zoom}
       onLoad={onLoad}
       options={{ streetViewControl: false, mapTypeControl: false }}
     >
@@ -75,7 +75,7 @@ function MapInner({ apiKey, listings }) {
 }
 
 export default function ListingsMap() {
-  const { key, loading } = useMapsKey();
+  const { key, zoom, loading } = useMapsKey();
   const [listings, setListings] = useState([]);
   const [error, setError] = useState('');
   const [fetching, setFetching] = useState(true);
@@ -128,7 +128,7 @@ export default function ListingsMap() {
             {listings.length} listing{listings.length === 1 ? '' : 's'} on the map · click a pin for
             details.
           </p>
-          <MapInner apiKey={key} listings={listings} />
+          <MapInner apiKey={key} listings={listings} zoom={zoom || 7} />
         </>
       )}
     </div>
