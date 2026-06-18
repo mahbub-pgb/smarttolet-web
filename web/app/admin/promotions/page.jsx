@@ -11,6 +11,9 @@ export default function Promotions() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
+  // Predefined messages + which one is selected ('new' = write a custom one).
+  const [promos, setPromos] = useState([]);
+  const [selected, setSelected] = useState('new');
 
   const loadBalance = async () => {
     try {
@@ -22,9 +25,24 @@ export default function Promotions() {
     }
   };
 
+  const loadPromos = async () => {
+    try {
+      const { data } = await api.get('/admin/settings');
+      const list = data.data.settings?.promoMessages || [];
+      setPromos(list);
+      if (list.length) setSelected('0'); // default to the first predefined message
+    } catch {
+      /* fall back to writing a custom message */
+    }
+  };
+
   useEffect(() => {
     loadBalance();
+    loadPromos();
   }, []);
+
+  // The message that will actually be sent.
+  const effectiveMessage = selected === 'new' ? message : promos[Number(selected)]?.message || '';
 
   const setNumber = (i) => (e) =>
     setNumbers((prev) => prev.map((n, idx) => (idx === i ? e.target.value : n)));
@@ -43,13 +61,14 @@ export default function Promotions() {
       setError('Add at least one number.');
       return;
     }
-    if (!message.trim()) {
-      setError('Enter a message.');
+    const text = effectiveMessage.trim();
+    if (!text) {
+      setError(selected === 'new' ? 'Enter a message.' : 'The selected message is empty.');
       return;
     }
     setBusy(true);
     try {
-      const { data } = await api.post('/admin/sms/promotion', { numbers: cleaned, message });
+      const { data } = await api.post('/admin/sms/promotion', { numbers: cleaned, message: text });
       const r = data.data;
       setBalance(r.balance);
       setProvider(r.provider);
@@ -111,14 +130,34 @@ export default function Promotions() {
         </button>
 
         <label>Message</label>
-        <textarea
-          rows={4}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          maxLength={1000}
-          placeholder="Write your promotional message…"
-        />
-        <small className="muted">{message.length}/1000 characters</small>
+        <select value={selected} onChange={(e) => setSelected(e.target.value)}>
+          {promos.map((m, i) => (
+            <option key={i} value={String(i)}>
+              {m.title}
+            </option>
+          ))}
+          <option value="new">✏️ New message…</option>
+        </select>
+        {promos.length === 0 && (
+          <small className="muted">
+            Tip: save reusable messages in Settings → Notifications.
+          </small>
+        )}
+
+        {selected === 'new' ? (
+          <>
+            <textarea
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              maxLength={1000}
+              placeholder="Write your promotional message…"
+            />
+            <small className="muted">{message.length}/1000 characters</small>
+          </>
+        ) : (
+          <textarea rows={4} value={effectiveMessage} readOnly />
+        )}
 
         <button className="btn btn-primary block" disabled={busy}>
           {busy ? 'Sending…' : 'Send SMS'}
