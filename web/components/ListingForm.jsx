@@ -54,9 +54,12 @@ function toForm(listing) {
     description: l.description || "",
     monthlyRent: l.monthlyRent ?? "",
     advanceAmount: l.advanceAmount ?? "",
+    availableFrom: l.availableFrom ? String(l.availableFrom).slice(0, 10) : "",
     bedrooms: l.details?.bedrooms ?? "",
     bathrooms: l.details?.bathrooms ?? "",
     balconies: l.details?.balconies ?? "",
+    floorNumber: l.details?.floorNumber ?? "",
+    buildingFloors: l.details?.buildingFloors ?? "",
     areaSqft: l.details?.areaSqft ?? "",
     status: l.status === "draft" ? "draft" : "pending",
   };
@@ -112,6 +115,7 @@ export default function ListingForm({
       fd.append("description", form.description);
       fd.append("monthlyRent", form.monthlyRent);
       if (form.advanceAmount) fd.append("advanceAmount", form.advanceAmount);
+      if (form.availableFrom) fd.append("availableFrom", form.availableFrom);
       fd.append("status", form.status);
 
       // Pin coordinates + reverse-geocoded location (sent as JSON; backend parses).
@@ -123,6 +127,8 @@ export default function ListingForm({
       if (form.bedrooms !== "") details.bedrooms = Number(form.bedrooms);
       if (form.bathrooms !== "") details.bathrooms = Number(form.bathrooms);
       if (form.balconies !== "") details.balconies = Number(form.balconies);
+      if (form.floorNumber !== "") details.floorNumber = Number(form.floorNumber);
+      if (form.buildingFloors !== "") details.buildingFloors = Number(form.buildingFloors);
       if (form.areaSqft !== "") details.areaSqft = Number(form.areaSqft);
 
       // Regroup the flattened amenity checkboxes back into details/utilities.
@@ -206,6 +212,9 @@ export default function ListingForm({
         </div>
       </div>
 
+      <label>Available from</label>
+      <input type="date" value={form.availableFrom} onChange={set("availableFrom")} />
+
       <h4>Location</h4>
       <MapPicker value={coords} onChange={handleMapChange} />
       {location?.formattedAddress ? (
@@ -253,6 +262,27 @@ export default function ListingForm({
             type="number"
             value={form.balconies}
             onChange={set("balconies")}
+            min={0}
+          />
+        </div>
+      </div>
+      <div className="row">
+        <div>
+          <label>Floor number</label>
+          <input
+            type="number"
+            value={form.floorNumber}
+            onChange={set("floorNumber")}
+            min={0}
+            placeholder="Which floor is it on?"
+          />
+        </div>
+        <div>
+          <label>Total floors in building</label>
+          <input
+            type="number"
+            value={form.buildingFloors}
+            onChange={set("buildingFloors")}
             min={0}
           />
         </div>
