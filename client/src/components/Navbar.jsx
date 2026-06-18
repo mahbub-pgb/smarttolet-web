@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, isStaff, logout } = useAuth();
   const navigate = useNavigate();
 
   const doLogout = async () => {
@@ -21,6 +21,11 @@ export default function Navbar() {
           <>
             <Link to="/create">+ Post Listing</Link>
             <Link to="/my-listings">My Listings</Link>
+            {isStaff && (
+              <Link to="/admin" className="btn btn-ghost">
+                Admin Panel
+              </Link>
+            )}
             <span className="nav-user">{user.fullName || user.mobile}</span>
             <button className="btn btn-ghost" onClick={doLogout}>
               Logout

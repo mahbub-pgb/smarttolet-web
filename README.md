@@ -1,55 +1,59 @@
-# Smart To-Let — Web Apps
+# Smart To-Let — Web App
 
-Two React (Vite) front-ends for the Smart To-Let API:
+A **single** React (Vite) front-end that serves both the public site **and** the
+admin panel. One dev server, one build.
 
-| App      | Folder    | Dev URL                 | Purpose                                  |
-| -------- | --------- | ----------------------- | ---------------------------------------- |
-| Client   | `client/` | http://localhost:3000   | Public site: browse, sign up/in, post listings |
-| Admin    | `admin/`  | http://localhost:3001   | Staff panel: dashboard, moderation, users, settings |
+| Area   | Path        | Who                                   |
+| ------ | ----------- | ------------------------------------- |
+| Public | `/`         | Everyone (browse, sign up/in, post listings) |
+| Admin  | `/admin/*`  | Staff only (dashboard, moderation, users, settings) |
 
-Both talk to the backend API at `http://localhost:5000/api/v1` (configurable via
-each app's `.env` → `VITE_API_URL`).
+> The old separate `admin/` app has been merged into `client/`. You can stop its
+> dev server and delete the `admin/` folder — it's no longer used.
+
+Talks to the backend API at `http://localhost:5000/api/v1` (set per-app in
+`client/.env` → `VITE_API_URL`).
 
 ## Prerequisites
 
-1. The **backend** (the `SmartTolet` project) running: `npm run dev` (port 5000),
-   with MongoDB and Redis up.
-2. Seed an admin account once: in the backend folder run `npm run seed:admin`.
-   Default super-admin login (from backend config / `.env`):
-   - identifier: `admin@smarttolet.com` (or mobile `+8801700000000`)
-   - password: `ChangeMe123!`
+1. Backend running: in the `SmartTolet` project, `npm run dev` (port 5000), with
+   MongoDB and Redis up.
+2. A staff account exists: `npm run seed:admin` in the backend.
+   Default super-admin: `admin@smarttolet.com` (or `+8801700000000`) / `ChangeMe123!`.
 
-## Run
+## Run (one server)
 
 ```bash
-# Client
 cd client
 npm install
 npm run dev      # http://localhost:3000
-
-# Admin (separate terminal)
-cd admin
-npm install
-npm run dev      # http://localhost:3001
 ```
+
+## Role-based routing
+
+There is **one** sign-in form (`/signin`). After signing in:
+
+- **Staff** (moderator / admin / super_admin) → redirected to **`/admin`** (the panel).
+- **Everyone else** → the public site (`/`).
+
+Staff can jump back to the public site from the sidebar ("View public site"), and
+a signed-in staff user also sees an "Admin Panel" link in the public navbar.
+Non-staff who try to open `/admin/*` are bounced to the public site.
 
 ## OTP in testing
 
-In non-production the backend uses a **fixed OTP `123456`** (and also returns it
-in the API response as `devOtp`), so you can sign up without a live SMS gateway.
-The sign-up screen pre-fills it automatically. In production
-(`NODE_ENV=production`) a real random OTP is generated and sent via SMS.
+Non-production uses a fixed OTP **`123456`** (also returned as `devOtp`), so you
+can sign up with no SMS gateway. The sign-up screen pre-fills it.
 
-## Sign-up flow (client)
+## Listing URLs
 
-1. Enter a Bangladesh mobile number (`+8801XXXXXXXXX`).
-2. Enter the OTP (`123456` in test mode — pre-filled).
-3. Complete profile (full name + password) → you're logged in.
+Single-listing pages use the **post title as a slug** instead of the raw id,
+e.g. `/listings/beautiful-flat-in-dhanmondi-3cb40a`. The backend generates the
+slug from the title (with a short stable suffix for uniqueness) and resolves
+either a slug or an id.
 
-## Posting a listing
+## Images
 
-Authenticated users can post via **+ Post Listing**. Images upload to Cloudinary
-through the backend (configure Cloudinary in admin Settings or backend `.env`;
-without it, image upload will error — you can still post with no images).
-New listings enter the moderation queue and appear publicly once an admin
-approves them in the Admin panel.
+Image uploads go to Cloudinary when configured; otherwise, in development they
+fall back to local disk (served from the backend at `/uploads`). You can post
+listings without images at any time.

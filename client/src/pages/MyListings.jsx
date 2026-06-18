@@ -70,7 +70,7 @@ export default function MyListings() {
             {listings.map((l) => (
               <tr key={l._id}>
                 <td>
-                  <Link to={`/listings/${l._id}`}>{l.title}</Link>
+                  <Link to={`/listings/${l.slug || l._id}`}>{l.title}</Link>
                 </td>
                 <td>{l.type?.replace(/_/g, ' ')}</td>
                 <td>৳ {Number(l.monthlyRent).toLocaleString()}</td>

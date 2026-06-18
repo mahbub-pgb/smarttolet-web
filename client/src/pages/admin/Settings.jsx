@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api, errMsg } from '../api/client';
+import { api, errMsg } from '../../api/client';
 
 export default function Settings() {
   const [form, setForm] = useState({
@@ -43,7 +43,6 @@ export default function Settings() {
     setError('');
     setBusy(true);
     try {
-      // Only send non-empty fields to satisfy URL/email validators.
       const payload = { maintenanceMode: form.maintenanceMode };
       ['siteName', 'supportEmail', 'supportPhone', 'googleMapsApiKey', 'maintenanceMessage'].forEach(
         (k) => {

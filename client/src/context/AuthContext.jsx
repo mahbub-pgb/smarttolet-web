@@ -3,6 +3,9 @@ import { api, tokenStore } from '../api/client';
 
 const AuthContext = createContext(null);
 
+const STAFF_ROLES = ['moderator', 'admin', 'super_admin'];
+export const isStaffRole = (role) => STAFF_ROLES.includes(role);
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -63,9 +66,11 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const isStaff = !!user && isStaffRole(user.role);
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, requestOtp, verifyOtp, completeProfile, logout, setUser }}
+      value={{ user, loading, isStaff, login, requestOtp, verifyOtp, completeProfile, logout, setUser }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api, errMsg } from '../api/client';
+import { api, errMsg } from '../../api/client';
 
 const LABELS = {
   totalUsers: 'Total Users',
@@ -36,7 +36,9 @@ export default function Dashboard() {
             <div className="stat-card" key={key}>
               <div className="stat-label">{label}</div>
               <div className="stat-value">
-                {key === 'monthlyRevenue' ? `৳ ${Number(cards[key] || 0).toLocaleString()}` : cards[key] ?? 0}
+                {key === 'monthlyRevenue'
+                  ? `৳ ${Number(cards[key] || 0).toLocaleString()}`
+                  : cards[key] ?? 0}
               </div>
             </div>
           ))}

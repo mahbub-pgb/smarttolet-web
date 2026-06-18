@@ -10,7 +10,7 @@ const TYPES = [
 function ListingCard({ listing }) {
   const img = listing.images?.[0]?.url;
   return (
-    <Link to={`/listings/${listing._id}`} className="listing-card">
+    <Link to={`/listings/${listing.slug || listing._id}`} className="listing-card">
       <div className="listing-thumb">
         {img ? <img src={img} alt={listing.title} /> : <div className="no-img">No image</div>}
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api, errMsg } from '../api/client';
+import { api, errMsg } from '../../api/client';
 
 export default function Users() {
   const [users, setUsers] = useState([]);

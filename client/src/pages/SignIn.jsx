@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, isStaffRole } from '../context/AuthContext';
 import { errMsg } from '../api/client';
 
 export default function SignIn() {
@@ -19,8 +19,13 @@ export default function SignIn() {
     setError('');
     setBusy(true);
     try {
-      await login(identifier, password);
-      navigate(from, { replace: true });
+      const u = await login(identifier, password);
+      // Staff land in the admin panel; everyone else goes to the public site.
+      if (isStaffRole(u.role)) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       setError(errMsg(err));
     } finally {

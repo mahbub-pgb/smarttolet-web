@@ -3,16 +3,17 @@ import { useParams, Link } from 'react-router-dom';
 import { api, errMsg } from '../api/client';
 
 export default function ListingDetail() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [listing, setListing] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // The backend resolves either a slug or a raw id.
     api
-      .get(`/listings/${id}`)
+      .get(`/listings/${slug}`)
       .then(({ data }) => setListing(data.data.listing))
       .catch((err) => setError(errMsg(err)));
-  }, [id]);
+  }, [slug]);
 
   if (error) return <div className="container"><div className="alert error">{error}</div></div>;
   if (!listing) return <div className="container">Loading…</div>;
