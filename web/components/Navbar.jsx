@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/AuthContext';
+import { useAuth } from "@/lib/AuthContext";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { user, isStaff, logout } = useAuth();
@@ -10,7 +10,7 @@ export default function Navbar() {
 
   const doLogout = async () => {
     await logout();
-    router.push('/');
+    router.push("/");
   };
 
   return (
@@ -19,13 +19,13 @@ export default function Navbar() {
         🏠 Smart To-Let
       </Link>
       <nav className="nav-links">
-        <Link href="/">Browse</Link>
-        <Link href="/map">Map</Link>
+        <Link href="/">All Tolet</Link>
+        <Link href="/map">MapView </Link>
         {user ? (
           <>
-            <Link href="/dashboard">Dashboard</Link>
             <Link href="/create">+ Post Listing</Link>
             <Link href="/my-listings">My Listings</Link>
+            <Link href="/dashboard">Dashboard</Link>
             {isStaff && (
               <Link href="/admin" className="btn btn-ghost">
                 Admin Panel

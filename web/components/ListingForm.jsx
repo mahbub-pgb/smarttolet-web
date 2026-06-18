@@ -62,6 +62,7 @@ function toForm(listing) {
     floorNumber: l.details?.floorNumber ?? "",
     buildingFloors: l.details?.buildingFloors ?? "",
     areaSqft: l.details?.areaSqft ?? "",
+    videoTourUrl: l.videoTourUrl || "",
     status: l.status === "draft" ? "draft" : "pending",
   };
   AMENITIES.forEach((a) => {
@@ -118,6 +119,7 @@ export default function ListingForm({
       fd.append("monthlyRent", form.monthlyRent);
       if (form.advanceAmount) fd.append("advanceAmount", form.advanceAmount);
       if (form.availableFrom) fd.append("availableFrom", form.availableFrom);
+      if (form.videoTourUrl) fd.append("videoTourUrl", form.videoTourUrl.trim());
       fd.append("status", form.status);
 
       // Pin coordinates + reverse-geocoded location (sent as JSON; backend parses).
@@ -349,6 +351,15 @@ export default function ListingForm({
       {images.length > 0 && (
         <small className="muted">{images.length} new image(s) selected</small>
       )}
+
+      <label>Video tour URL (YouTube)</label>
+      <input
+        type="url"
+        value={form.videoTourUrl}
+        onChange={set("videoTourUrl")}
+        placeholder="https://www.youtube.com/watch?v=…"
+      />
+      <small className="muted">Optional — a YouTube link is embedded on the listing page.</small>
 
       <label>Visibility</label>
       <select value={form.status} onChange={set("status")}>

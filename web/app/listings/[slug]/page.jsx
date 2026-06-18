@@ -3,8 +3,7 @@ import { notFound } from 'next/navigation';
 import { apiGet } from '@/lib/apiServer';
 import { SITE_URL, SITE_NAME } from '@/lib/constants';
 import Gallery from '@/components/Gallery';
-import MapView from '@/components/map/MapView';
-import DirectionsButton from '@/components/DirectionsButton';
+import ListingPrivateInfo from '@/components/ListingPrivateInfo';
 
 export const revalidate = 300; // ISR: refresh listing pages every 5 min
 
@@ -34,6 +33,15 @@ const OCCUPANCY = [
 async function getListing(slug) {
   const data = await apiGet(`/listings/${slug}`, { revalidate: 300 });
   return data?.listing || null;
+}
+
+// Extract an 11-char YouTube video id from the common URL shapes.
+function youtubeId(url) {
+  if (!url) return null;
+  const m = String(url).match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+  );
+  return m ? m[1] : null;
 }
 
 function addressText(listing) {
@@ -146,6 +154,20 @@ export default async function ListingDetailPage({ params }) {
           <h3>Description</h3>
           <p>{listing.description}</p>
 
+          {youtubeId(listing.videoTourUrl) && (
+            <>
+              <h3>Video tour</h3>
+              <div className="video-embed">
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeId(listing.videoTourUrl)}`}
+                  title="Video tour"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </>
+          )}
+
           <h3>Pricing &amp; availability</h3>
           <ul className="fact-list">
             <li><span>Monthly rent</span><strong>৳ {Number(listing.monthlyRent).toLocaleString()}</strong></li>
@@ -161,8 +183,7 @@ export default async function ListingDetailPage({ params }) {
           </ul>
 
           {(d.bedrooms != null || d.bathrooms != null || d.balconies != null ||
-            d.floorNumber != null || d.buildingFloors != null || d.areaSqft != null ||
-            d.furnishedStatus) && (
+            d.floorNumber != null || d.buildingFloors != null || d.areaSqft != null) && (
             <>
               <h3>Property details</h3>
               <ul className="fact-list">
@@ -172,9 +193,6 @@ export default async function ListingDetailPage({ params }) {
                 {d.floorNumber != null && <li><span>Floor</span><strong>{d.floorNumber}</strong></li>}
                 {d.buildingFloors != null && <li><span>Building floors</span><strong>{d.buildingFloors}</strong></li>}
                 {d.areaSqft != null && <li><span>Area</span><strong>{d.areaSqft} sqft</strong></li>}
-                {d.furnishedStatus && (
-                  <li><span>Furnishing</span><strong>{d.furnishedStatus.replace(/_/g, ' ')}</strong></li>
-                )}
               </ul>
             </>
           )}
@@ -201,24 +219,11 @@ export default async function ListingDetailPage({ params }) {
             </>
           )}
 
-          {Array.isArray(coords) && coords.length === 2 && (
-            <>
-              <h3>Location</h3>
-              <MapView lat={coords[1]} lng={coords[0]} />
-              <DirectionsButton lat={coords[1]} lng={coords[0]} />
-            </>
-          )}
-
-          {listing.owner && (
-            <div className="owner-box">
-              <h4>Posted by</h4>
-              <p>
-                {listing.owner.fullName || 'Owner'}
-                {listing.owner.isLandlordVerified && <span className="badge verified">Verified</span>}
-              </p>
-              {listing.owner.mobile && <p className="muted">📞 {listing.owner.mobile}</p>}
-            </div>
-          )}
+          <ListingPrivateInfo
+            lat={Array.isArray(coords) && coords.length === 2 ? coords[1] : undefined}
+            lng={Array.isArray(coords) && coords.length === 2 ? coords[0] : undefined}
+            owner={listing.owner}
+          />
         </div>
       </div>
     </div>
