@@ -1,0 +1,249 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { api, errMsg } from '@/lib/apiClient';
+
+const STATUSES = ['all', 'pending', 'approved', 'rejected', 'draft', 'rented', 'expired'];
+const TYPES = [
+  'apartment', 'flat', 'family_house', 'bachelor_room', 'sublet',
+  'hostel', 'mess', 'office', 'shop', 'commercial_space',
+];
+const SORTS = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'oldest', label: 'Oldest first' },
+  { value: 'rent_desc', label: 'Rent: high → low' },
+  { value: 'rent_asc', label: 'Rent: low → high' },
+  { value: 'most_viewed', label: 'Most viewed' },
+  { value: 'most_reported', label: 'Most reported' },
+];
+const STATUS_COLOR = {
+  approved: 'green',
+  pending: 'orange',
+  rejected: 'red',
+  draft: 'gray',
+  rented: 'blue',
+  expired: 'gray',
+};
+const PAGE_SIZE = 20;
+
+function pageWindow(page, totalPages) {
+  const span = 2;
+  const pages = [];
+  const start = Math.max(1, page - span);
+  const end = Math.min(totalPages, page + span);
+  if (start > 1) pages.push(1, start > 2 ? '…' : null);
+  for (let p = start; p <= end; p += 1) pages.push(p);
+  if (end < totalPages) pages.push(end < totalPages - 1 ? '…' : null, totalPages);
+  return pages.filter((p) => p !== null);
+}
+
+export default function Moderation() {
+  const [listings, setListings] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busyId, setBusyId] = useState(null);
+  const [filters, setFilters] = useState({ status: 'all', type: '', sort: 'newest', keyword: '' });
+  const [page, setPage] = useState(1);
+
+  const load = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const params = { page, limit: PAGE_SIZE, sort: filters.sort, status: filters.status };
+      if (filters.type) params.type = filters.type;
+      if (filters.keyword) params.keyword = filters.keyword;
+      const { data } = await api.get('/admin/listings/queue', { params });
+      setListings(data.data.listings || []);
+      setMeta(data.meta || null);
+    } catch (err) {
+      setError(errMsg(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.status, filters.type, filters.sort, page]);
+
+  const setFilter = (k, v) => {
+    setPage(1);
+    setFilters((f) => ({ ...f, [k]: v }));
+  };
+
+  const moderate = async (listing, approve) => {
+    let reason;
+    if (!approve) reason = window.prompt('Rejection reason (optional):') || undefined;
+    setBusyId(listing._id);
+    try {
+      await api.patch(`/admin/listings/${listing._id}/moderate`, { approve, reason });
+      // Reflect the new status in place.
+      setListings((prev) =>
+        prev.map((l) =>
+          l._id === listing._id ? { ...l, status: approve ? 'approved' : 'rejected' } : l,
+        ),
+      );
+    } catch (err) {
+      alert(errMsg(err));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const goTo = (p) => {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <div>
+      <h1>Listings</h1>
+      <p className="muted">Review and moderate every listing on the platform.</p>
+
+      <div className="toolbar wrap">
+        <label className="inline">
+          Status
+          <select value={filters.status} onChange={(e) => setFilter('status', e.target.value)}>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s === 'all' ? 'All statuses' : s}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="inline">
+          Type
+          <select value={filters.type} onChange={(e) => setFilter('type', e.target.value)}>
+            <option value="">All types</option>
+            {TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t.replace(/_/g, ' ')}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="inline">
+          Sort
+          <select value={filters.sort} onChange={(e) => setFilter('sort', e.target.value)}>
+            {SORTS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <form
+          className="inline grow"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setPage(1);
+            load();
+          }}
+        >
+          <input
+            placeholder="Search title / description…"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value }))}
+          />
+          <button className="btn btn-primary">Search</button>
+        </form>
+      </div>
+
+      {error && <div className="alert error">{error}</div>}
+      {meta && (
+        <p className="muted results-line">
+          {meta.total.toLocaleString()} listing{meta.total === 1 ? '' : 's'} · page {meta.page} of{' '}
+          {meta.totalPages}
+        </p>
+      )}
+
+      {loading ? (
+        <p>Loading…</p>
+      ) : listings.length === 0 ? (
+        <p className="muted">No listings match these filters.</p>
+      ) : (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Location</th>
+              <th>Rent</th>
+              <th>Views</th>
+              <th>Reports</th>
+              <th>Status</th>
+              <th>Owner</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {listings.map((l) => (
+              <tr key={l._id}>
+                <td>
+                  <Link href={`/listings/${l.slug || l._id}`} target="_blank" rel="noreferrer">
+                    {l.title}
+                  </Link>
+                </td>
+                <td>{l.type?.replace(/_/g, ' ')}</td>
+                <td>{[l.location?.area, l.location?.district].filter(Boolean).join(', ')}</td>
+                <td>৳ {Number(l.monthlyRent).toLocaleString()}</td>
+                <td>{l.viewsCount ?? 0}</td>
+                <td>{l.reportsCount ?? 0}</td>
+                <td>
+                  <span className={`status ${STATUS_COLOR[l.status] || 'gray'}`}>{l.status}</span>
+                </td>
+                <td>{l.owner?.fullName || l.owner?.mobile || '—'}</td>
+                <td className="actions">
+                  <button
+                    className="btn btn-primary sm"
+                    disabled={busyId === l._id || l.status === 'approved'}
+                    onClick={() => moderate(l, true)}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    className="btn btn-danger sm"
+                    disabled={busyId === l._id || l.status === 'rejected'}
+                    onClick={() => moderate(l, false)}
+                  >
+                    Reject
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {meta && meta.totalPages > 1 && (
+        <nav className="pagination">
+          <button className="btn btn-ghost sm" disabled={!meta.hasPrevPage} onClick={() => goTo(page - 1)}>
+            ← Prev
+          </button>
+          {pageWindow(meta.page, meta.totalPages).map((p, i) =>
+            p === '…' ? (
+              <span key={`gap-${i}`} className="page-gap">
+                …
+              </span>
+            ) : (
+              <button
+                key={p}
+                className={`btn sm ${p === meta.page ? 'btn-primary' : 'btn-ghost'}`}
+                onClick={() => goTo(p)}
+                disabled={p === meta.page}
+              >
+                {p}
+              </button>
+            ),
+          )}
+          <button className="btn btn-ghost sm" disabled={!meta.hasNextPage} onClick={() => goTo(page + 1)}>
+            Next →
+          </button>
+        </nav>
+      )}
+    </div>
+  );
+}
