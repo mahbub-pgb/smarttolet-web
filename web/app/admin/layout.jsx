@@ -10,6 +10,7 @@ const NAV = [
   { href: '/admin/moderation', label: 'Moderation' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/settings', label: 'Settings' },
+  { href: '/admin/promotions', label: 'Promotions' },
 ];
 
 function AdminShell({ children }) {
