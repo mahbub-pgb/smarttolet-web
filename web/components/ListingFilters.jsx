@@ -69,6 +69,7 @@ export default function ListingFilters({ showSort = false, basePath = '/' }) {
     AMENITIES.forEach((a) => {
       if (amenities[a.key]) params.set(a.key, 'true');
     });
+    setOpen(false); // collapse the expanded filters once a search runs
     router.push(params.toString() ? `${basePath}?${params.toString()}` : basePath);
   };
 
@@ -76,6 +77,7 @@ export default function ListingFilters({ showSort = false, basePath = '/' }) {
     setF({ keyword: '', type: '', bedrooms: '', bathrooms: '', balconies: '', sort: '' });
     setPrice({ min: PRICE_MIN, max: PRICE_MAX });
     setAmenities(Object.fromEntries(AMENITIES.map((a) => [a.key, false])));
+    setOpen(false); // collapse the expanded filters when clearing
     router.push(basePath);
   };
 
@@ -98,6 +100,9 @@ export default function ListingFilters({ showSort = false, basePath = '/' }) {
           {amenityCount > 0 ? ` (${amenityCount})` : ''}
         </button>
         <button className="btn btn-primary">Search</button>
+        <button type="button" className="btn btn-ghost" onClick={reset}>
+          Clear all
+        </button>
       </div>
 
       {open && (
@@ -144,10 +149,6 @@ export default function ListingFilters({ showSort = false, basePath = '/' }) {
               </label>
             ))}
           </div>
-
-          <button type="button" className="btn btn-ghost sm" onClick={reset}>
-            Clear all
-          </button>
         </div>
       )}
     </form>

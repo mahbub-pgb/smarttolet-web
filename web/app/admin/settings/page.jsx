@@ -10,6 +10,8 @@ export default function Settings() {
     supportPhone: '',
     googleMapsApiKey: '',
     mapDefaultZoom: 7,
+    listingExpiryValue: 30,
+    listingExpiryUnit: 'days',
     smsProvider: 'mock',
     smsSenderId: '',
     smsApiKey: '',
@@ -40,6 +42,8 @@ export default function Settings() {
           supportPhone: s.supportPhone || '',
           googleMapsApiKey: s.googleMapsApiKey || '',
           mapDefaultZoom: s.mapDefaultZoom ?? 7,
+          listingExpiryValue: s.listingExpiry?.value ?? 30,
+          listingExpiryUnit: s.listingExpiry?.unit || 'days',
           smsProvider: s.sms?.provider || 'mock',
           smsSenderId: s.sms?.senderId || '',
           smsApiKey: '',
@@ -65,6 +69,10 @@ export default function Settings() {
       const payload = {
         maintenanceMode: form.maintenanceMode,
         mapDefaultZoom: Number(form.mapDefaultZoom) || 7,
+        listingExpiry: {
+          value: Math.max(0, Number(form.listingExpiryValue) || 0),
+          unit: form.listingExpiryUnit,
+        },
       };
       ['siteName', 'supportEmail', 'supportPhone', 'googleMapsApiKey', 'maintenanceMessage'].forEach(
         (k) => {
@@ -130,6 +138,28 @@ export default function Settings() {
               value={form.mapDefaultZoom}
               onChange={set('mapDefaultZoom')}
             />
+
+            <label>Auto-deactivate listings after</label>
+            <div className="row">
+              <div>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.listingExpiryValue}
+                  onChange={set('listingExpiryValue')}
+                />
+              </div>
+              <div>
+                <select value={form.listingExpiryUnit} onChange={set('listingExpiryUnit')}>
+                  <option value="days">days</option>
+                  <option value="months">months</option>
+                </select>
+              </div>
+            </div>
+            <small className="muted">
+              An approved listing is automatically deactivated once this period passes from its
+              approval date. Set to 0 to keep listings active indefinitely.
+            </small>
 
             <label className="checkbox">
               <input type="checkbox" checked={form.maintenanceMode} onChange={set('maintenanceMode')} />
