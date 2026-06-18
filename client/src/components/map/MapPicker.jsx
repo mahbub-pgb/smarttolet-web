@@ -41,25 +41,39 @@ function PickerInner({ apiKey, value, onChange }) {
     [reverseGeocode],
   );
 
-  // Ask the browser for the device's current location and pin it.
-  const locateMe = useCallback(() => {
-    if (!navigator.geolocation) return;
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocating(false);
-        place(pos.coords.latitude, pos.coords.longitude, true);
-      },
-      () => setLocating(false), // permission denied / unavailable: keep default
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
-  }, [place]);
+  // Ask the browser for the device's current location and pin it. When
+  // `fallbackToDefault` is set, drop a pin at the default center if geolocation
+  // is unavailable/denied so a draggable pin is always visible.
+  const locateMe = useCallback(
+    (fallbackToDefault = false) => {
+      const dropDefault = () => {
+        if (fallbackToDefault && !marker) place(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, true);
+      };
+      if (!navigator.geolocation) {
+        dropDefault();
+        return;
+      }
+      setLocating(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setLocating(false);
+          place(pos.coords.latitude, pos.coords.longitude, true);
+        },
+        () => {
+          setLocating(false);
+          dropDefault();
+        },
+        { enableHighAccuracy: true, timeout: 10000 },
+      );
+    },
+    [place, marker],
+  );
 
-  // On first load with no existing pin, auto-locate the user.
+  // On first load with no existing pin, auto-locate the user (default pin on fail).
   useEffect(() => {
     if (isLoaded && !marker && !didAutoLocate.current) {
       didAutoLocate.current = true;
-      locateMe();
+      locateMe(true);
     }
   }, [isLoaded, marker, locateMe]);
 
