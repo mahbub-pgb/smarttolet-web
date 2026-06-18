@@ -89,6 +89,27 @@ small { display: block; margin-top: 4px; }
 a.btn:hover { text-decoration: none; }
 .actions { white-space: nowrap; }
 
+/* Map picker */
+.map-picker { margin-bottom: 6px; }
+.map-search {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+.map-placeholder {
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef1ef;
+  border-radius: 10px;
+  color: var(--muted);
+}
+.picked-address { margin: 8px 0 0; font-weight: 600; }
+
 /* Image thumbnails (edit form) */
 .thumb-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .thumb { width: 84px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }

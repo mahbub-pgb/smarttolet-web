@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { errMsg } from '../api/client';
+import MapPicker from './map/MapPicker';
 
 const TYPES = [
   'apartment', 'flat', 'family_house', 'bachelor_room', 'sublet',
@@ -16,12 +17,6 @@ function toForm(listing) {
     description: l.description || '',
     monthlyRent: l.monthlyRent ?? '',
     advanceAmount: l.advanceAmount ?? '',
-    division: l.location?.division || '',
-    district: l.location?.district || '',
-    upazila: l.location?.upazila || '',
-    area: l.location?.area || '',
-    road: l.location?.road || '',
-    houseNumber: l.location?.houseNumber || '',
     bedrooms: l.details?.bedrooms ?? '',
     bathrooms: l.details?.bathrooms ?? '',
     areaSqft: l.details?.areaSqft ?? '',
@@ -30,21 +25,35 @@ function toForm(listing) {
   };
 }
 
-/**
- * Shared create/edit listing form. `onSubmit` receives a ready FormData and
- * should perform the POST/PUT (and navigate). Errors thrown by it are shown.
- */
+// GeoJSON stores [lng, lat]; the map works in { lat, lng }.
+function initialCoords(listing) {
+  const c = listing?.geo?.coordinates;
+  return Array.isArray(c) && c.length === 2 ? { lng: c[0], lat: c[1] } : null;
+}
+
 export default function ListingForm({ initial, existingImages = [], submitLabel = 'Save', onSubmit }) {
   const [form, setForm] = useState(() => toForm(initial));
   const [images, setImages] = useState([]);
+  const [coords, setCoords] = useState(() => initialCoords(initial));
+  const [location, setLocation] = useState(() => initial?.location || {});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
+  // Stable callback so the map isn't re-rendered/reset on every keystroke.
+  const handleMapChange = useCallback(({ lat, lng, location: loc }) => {
+    setCoords({ lat, lng });
+    setLocation(loc || {});
+  }, []);
+
   const submit = async (e) => {
     e.preventDefault();
     setError('');
+    if (!coords) {
+      setError('Please pin the listing location on the map.');
+      return;
+    }
     setBusy(true);
     try {
       const fd = new FormData();
@@ -55,18 +64,11 @@ export default function ListingForm({ initial, existingImages = [], submitLabel 
       if (form.advanceAmount) fd.append('advanceAmount', form.advanceAmount);
       fd.append('status', form.status);
 
-      // Nested objects are sent as JSON strings (backend parses them back).
-      fd.append(
-        'location',
-        JSON.stringify({
-          division: form.division,
-          district: form.district,
-          upazila: form.upazila || undefined,
-          area: form.area || undefined,
-          road: form.road || undefined,
-          houseNumber: form.houseNumber || undefined,
-        }),
-      );
+      // Pin coordinates + reverse-geocoded location (sent as JSON; backend parses).
+      fd.append('latitude', coords.lat);
+      fd.append('longitude', coords.lng);
+      fd.append('location', JSON.stringify(location || {}));
+
       const details = {};
       if (form.bedrooms !== '') details.bedrooms = Number(form.bedrooms);
       if (form.bathrooms !== '') details.bathrooms = Number(form.bathrooms);
@@ -115,36 +117,14 @@ export default function ListingForm({ initial, existingImages = [], submitLabel 
       </div>
 
       <h4>Location</h4>
-      <div className="row">
-        <div>
-          <label>Division</label>
-          <input value={form.division} onChange={set('division')} required />
-        </div>
-        <div>
-          <label>District</label>
-          <input value={form.district} onChange={set('district')} required />
-        </div>
-      </div>
-      <div className="row">
-        <div>
-          <label>Upazila</label>
-          <input value={form.upazila} onChange={set('upazila')} />
-        </div>
-        <div>
-          <label>Area</label>
-          <input value={form.area} onChange={set('area')} />
-        </div>
-      </div>
-      <div className="row">
-        <div>
-          <label>Road</label>
-          <input value={form.road} onChange={set('road')} />
-        </div>
-        <div>
-          <label>House number</label>
-          <input value={form.houseNumber} onChange={set('houseNumber')} />
-        </div>
-      </div>
+      <MapPicker value={coords} onChange={handleMapChange} />
+      {location?.formattedAddress ? (
+        <p className="muted picked-address">📍 {location.formattedAddress}</p>
+      ) : coords ? (
+        <p className="muted picked-address">
+          📍 Pinned at {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+        </p>
+      ) : null}
 
       <h4>Details</h4>
       <div className="row">

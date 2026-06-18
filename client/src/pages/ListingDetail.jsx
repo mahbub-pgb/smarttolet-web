@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, errMsg } from '../api/client';
+import MapView from '../components/map/MapView';
 
 export default function ListingDetail() {
   const { slug } = useParams();
@@ -19,6 +20,12 @@ export default function ListingDetail() {
   if (!listing) return <div className="container">Loading…</div>;
 
   const d = listing.details || {};
+  const coords = listing.geo?.coordinates; // [lng, lat]
+  const addressText =
+    listing.location?.formattedAddress ||
+    [listing.location?.area, listing.location?.upazila, listing.location?.district, listing.location?.division]
+      .filter(Boolean)
+      .join(', ');
   return (
     <div className="container">
       <Link to="/" className="muted">
@@ -36,11 +43,7 @@ export default function ListingDetail() {
           <span className="badge">{listing.type?.replace(/_/g, ' ')}</span>
           <h1>{listing.title}</h1>
           <div className="rent big">৳ {Number(listing.monthlyRent).toLocaleString()}/mo</div>
-          <p className="muted">
-            {[listing.location?.area, listing.location?.upazila, listing.location?.district, listing.location?.division]
-              .filter(Boolean)
-              .join(', ')}
-          </p>
+          {addressText && <p className="muted">📍 {addressText}</p>}
           <div className="spec-row">
             {d.bedrooms != null && <span>🛏 {d.bedrooms} bed</span>}
             {d.bathrooms != null && <span>🛁 {d.bathrooms} bath</span>}
@@ -49,6 +52,12 @@ export default function ListingDetail() {
           </div>
           <h3>Description</h3>
           <p>{listing.description}</p>
+          {Array.isArray(coords) && coords.length === 2 && (
+            <>
+              <h3>Location</h3>
+              <MapView lat={coords[1]} lng={coords[0]} />
+            </>
+          )}
           {listing.owner && (
             <div className="owner-box">
               <h4>Posted by</h4>
