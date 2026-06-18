@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, errMsg } from '../api/client';
 import MapView from '../components/map/MapView';
+import Gallery from '../components/Gallery';
 
 export default function ListingDetail() {
   const { slug } = useParams();
@@ -33,11 +34,7 @@ export default function ListingDetail() {
       </Link>
       <div className="detail">
         <div className="gallery">
-          {listing.images?.length ? (
-            listing.images.map((img, i) => <img key={i} src={img.url} alt={`${listing.title} ${i}`} />)
-          ) : (
-            <div className="no-img big">No images</div>
-          )}
+          <Gallery images={listing.images || []} title={listing.title} />
         </div>
         <div className="detail-body">
           <span className="badge">{listing.type?.replace(/_/g, ' ')}</span>
