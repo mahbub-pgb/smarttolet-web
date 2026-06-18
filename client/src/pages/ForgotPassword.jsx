@@ -12,7 +12,6 @@ export default function ForgotPassword() {
   const [code, setCode] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [devOtp, setDevOtp] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,8 +20,7 @@ export default function ForgotPassword() {
     setError('');
     setBusy(true);
     try {
-      const res = await requestPasswordReset(mobile);
-      setDevOtp(res?.devOtp || '');
+      await requestPasswordReset(mobile);
       setStep(2);
     } catch (err) {
       setError(errMsg(err));
@@ -70,7 +68,6 @@ export default function ForgotPassword() {
           </form>
         ) : (
           <form onSubmit={doReset}>
-            {devOtp && <div className="alert info">Dev code: {devOtp}</div>}
             <label>Verification code</label>
             <input
               value={code}

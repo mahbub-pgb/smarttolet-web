@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
   // OTP signup helpers.
   const requestOtp = async (mobile) => {
     const { data } = await api.post('/auth/otp/request', { mobile });
-    return data.data; // { expiresIn, devOtp }
+    return data.data; // { expiresIn }
   };
 
   const verifyOtp = async (mobile, code) => {
@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
   // Forgot-password flow (logged out): request a reset OTP, then reset.
   const requestPasswordReset = async (mobile) => {
     const { data } = await api.post('/auth/password/forgot', { mobile });
-    return data.data; // { expiresIn, devOtp? }
+    return data.data; // { expiresIn }
   };
 
   const resetPassword = async (mobile, code, newPassword) => {

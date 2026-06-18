@@ -10,7 +10,6 @@ export default function SignUp() {
   const [step, setStep] = useState(1); // 1: mobile, 2: otp, 3: profile
   const [mobile, setMobile] = useState('+8801');
   const [code, setCode] = useState('');
-  const [devOtp, setDevOtp] = useState('');
   const [profile, setProfile] = useState({ fullName: '', email: '', password: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -20,11 +19,7 @@ export default function SignUp() {
     setError('');
     setBusy(true);
     try {
-      const res = await requestOtp(mobile);
-      if (res.devOtp) {
-        setDevOtp(res.devOtp);
-        setCode(res.devOtp); // pre-fill for convenient testing
-      }
+      await requestOtp(mobile);
       setStep(2);
     } catch (err) {
       setError(errMsg(err));
@@ -99,11 +94,6 @@ export default function SignUp() {
               placeholder="123456"
               required
             />
-            {devOtp && (
-              <div className="alert info">
-                Test mode OTP: <strong>{devOtp}</strong>
-              </div>
-            )}
             <button className="btn btn-primary block" disabled={busy}>
               {busy ? 'Verifying…' : 'Verify'}
             </button>
