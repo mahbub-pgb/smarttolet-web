@@ -7,7 +7,9 @@ export default function SignIn() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+  // Where to land after a normal-user login: back to the page that sent them
+  // to sign-in, otherwise their dashboard.
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -37,6 +39,9 @@ export default function SignIn() {
     <div className="container narrow">
       <div className="card">
         <h2>Welcome back</h2>
+        {location.state?.reset && (
+          <div className="alert info">Password reset. Please sign in with your new password.</div>
+        )}
         {error && <div className="alert error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>Mobile or email</label>
@@ -57,6 +62,9 @@ export default function SignIn() {
             {busy ? 'Signing in…' : 'Sign In'}
           </button>
         </form>
+        <p className="muted center">
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
         <p className="muted center">
           No account? <Link to="/signup">Sign up</Link>
         </p>

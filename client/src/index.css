@@ -328,6 +328,16 @@ a.directions-btn:hover { text-decoration: none; }
 .status.gray { background: #eceeed; color: #6b7a73; }
 .status.blue { background: #eaf4ff; color: #1d5fad; }
 
+/* User dashboard */
+.profile-summary { margin-bottom: 18px; }
+.profile-summary h3 { margin: 0 0 4px; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.stat-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--primary); }
+.stat-label { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.dash-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.linklike { background: none; border: none; color: var(--primary); cursor: pointer; padding: 0; font: inherit; }
+
 @media (max-width: 700px) {
   .detail { grid-template-columns: 1fr; }
   .row { flex-direction: column; }

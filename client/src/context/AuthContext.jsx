@@ -56,6 +56,21 @@ export function AuthProvider({ children }) {
     return data.data.user;
   };
 
+  // Account: change password while logged in.
+  const changePassword = async (currentPassword, newPassword) => {
+    await api.post('/auth/password/change', { currentPassword, newPassword });
+  };
+
+  // Forgot-password flow (logged out): request a reset OTP, then reset.
+  const requestPasswordReset = async (mobile) => {
+    const { data } = await api.post('/auth/password/forgot', { mobile });
+    return data.data; // { expiresIn, devOtp? }
+  };
+
+  const resetPassword = async (mobile, code, newPassword) => {
+    await api.post('/auth/password/reset', { mobile, code, newPassword });
+  };
+
   const logout = async () => {
     try {
       await api.post('/auth/logout');
@@ -70,7 +85,10 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isStaff, login, requestOtp, verifyOtp, completeProfile, logout, setUser }}
+      value={{
+        user, loading, isStaff, login, requestOtp, verifyOtp, completeProfile,
+        changePassword, requestPasswordReset, resetPassword, logout, setUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

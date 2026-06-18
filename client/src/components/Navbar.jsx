@@ -20,6 +20,7 @@ export default function Navbar() {
         <Link to="/map">Map</Link>
         {user ? (
           <>
+            <Link to="/dashboard">Dashboard</Link>
             <Link to="/create">+ Post Listing</Link>
             <Link to="/my-listings">My Listings</Link>
             {isStaff && (
