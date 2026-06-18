@@ -16,6 +16,8 @@ export default function Settings() {
     smsSenderId: '',
     smsApiKey: '',
     smsApiKeyConfigured: false,
+    pwSmsEnabled: false,
+    pwSmsTemplate: '',
     maintenanceMode: false,
     maintenanceMessage: '',
   });
@@ -49,6 +51,8 @@ export default function Settings() {
           smsApiKey: '',
           // Admin endpoint masks the key as '***configured***' when one is set.
           smsApiKeyConfigured: !!s.sms?.apiKey,
+          pwSmsEnabled: !!s.passwordChangeSms?.enabled,
+          pwSmsTemplate: s.passwordChangeSms?.template || '',
           maintenanceMode: !!s.maintenanceMode,
           maintenanceMessage: s.maintenanceMessage || '',
         }));
@@ -85,6 +89,12 @@ export default function Settings() {
       payload.sms = { provider: form.smsProvider, senderId: form.smsSenderId };
       if (form.smsApiKey) payload.sms.apiKey = form.smsApiKey;
 
+      // Password-change SMS notification.
+      payload.passwordChangeSms = {
+        enabled: form.pwSmsEnabled,
+        template: form.pwSmsTemplate,
+      };
+
       await api.put('/admin/settings', payload);
       setMsg('Settings saved.');
     } catch (err) {
@@ -115,6 +125,13 @@ export default function Settings() {
           onClick={() => setTab('api')}
         >
           API & Integrations
+        </button>
+        <button
+          type="button"
+          className={`tab ${tab === 'notifications' ? 'active' : ''}`}
+          onClick={() => setTab('notifications')}
+        >
+          Notifications
         </button>
       </div>
 
@@ -197,6 +214,29 @@ export default function Settings() {
             <small className="muted">
               {form.smsApiKeyConfigured ? 'A key is configured. ' : 'No key set yet. '}
               Used when the provider is BulkSMSBD.
+            </small>
+          </>
+        )}
+
+        {tab === 'notifications' && (
+          <>
+            <h3>Password-change SMS</h3>
+            <label className="checkbox">
+              <input type="checkbox" checked={form.pwSmsEnabled} onChange={set('pwSmsEnabled')} />
+              Send an SMS with the new password when an admin changes a user&apos;s password
+            </label>
+
+            <label>Message template</label>
+            <textarea
+              rows={3}
+              value={form.pwSmsTemplate}
+              onChange={set('pwSmsTemplate')}
+              maxLength={480}
+              placeholder="Your Smart To-Let password has been reset by an administrator. New password: {password}"
+            />
+            <small className="muted">
+              Use <code>{'{password}'}</code> where the new password should appear. It is replaced
+              with the actual password when the SMS is sent.
             </small>
           </>
         )}
