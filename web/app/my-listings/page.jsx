@@ -45,6 +45,16 @@ function MyListingsInner() {
     }
   };
 
+  const renew = async (id) => {
+    try {
+      const { data } = await api.post(`/listings/${id}/renew`);
+      const updated = data.data.listing;
+      setListings((prev) => prev.map((l) => (l._id === id ? { ...l, ...updated } : l)));
+    } catch (err) {
+      alert(errMsg(err));
+    }
+  };
+
   return (
     <div className="container">
       <div className="page-head">
@@ -72,6 +82,9 @@ function MyListingsInner() {
               <tr key={l._id}>
                 <td>
                   <Link href={`/listings/${l.slug || l._id}`}>{l.title}</Link>
+                  {l.status === 'rejected' && l.rejectionReason && (
+                    <div className="reject-note">⚠ Rejected: {l.rejectionReason}</div>
+                  )}
                 </td>
                 <td>{l.type?.replace(/_/g, ' ')}</td>
                 <td>৳ {Number(l.monthlyRent).toLocaleString()}</td>
@@ -80,6 +93,11 @@ function MyListingsInner() {
                 </td>
                 <td className="actions">
                   <Link href={`/listings/${l._id}/edit`} className="btn btn-ghost sm">Edit</Link>
+                  {(l.status === 'expired' || l.status === 'approved') && (
+                    <button className="btn btn-ghost sm" onClick={() => renew(l._id)}>
+                      {l.status === 'expired' ? 'Reactivate' : 'Renew'}
+                    </button>
+                  )}
                   <button className="btn btn-ghost sm" onClick={() => remove(l._id)}>Delete</button>
                 </td>
               </tr>

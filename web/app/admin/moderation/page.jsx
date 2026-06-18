@@ -46,6 +46,9 @@ export default function Moderation() {
   const [busyId, setBusyId] = useState(null);
   const [filters, setFilters] = useState({ status: 'all', type: '', sort: 'newest', keyword: '' });
   const [page, setPage] = useState(1);
+  // Listing currently being rejected (drives the rejection-reason modal).
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -74,16 +77,16 @@ export default function Moderation() {
     setFilters((f) => ({ ...f, [k]: v }));
   };
 
-  const moderate = async (listing, approve) => {
-    let reason;
-    if (!approve) reason = window.prompt('Rejection reason (optional):') || undefined;
+  const applyModeration = async (listing, approve, reason) => {
     setBusyId(listing._id);
     try {
       await api.patch(`/admin/listings/${listing._id}/moderate`, { approve, reason });
-      // Reflect the new status in place.
+      // Reflect the new status (and reason) in place.
       setListings((prev) =>
         prev.map((l) =>
-          l._id === listing._id ? { ...l, status: approve ? 'approved' : 'rejected' } : l,
+          l._id === listing._id
+            ? { ...l, status: approve ? 'approved' : 'rejected', rejectionReason: approve ? undefined : reason }
+            : l,
         ),
       );
     } catch (err) {
@@ -91,6 +94,21 @@ export default function Moderation() {
     } finally {
       setBusyId(null);
     }
+  };
+
+  // Rejecting opens a modal to capture the reason; approving applies directly.
+  const reject = (listing) => {
+    setRejectReason('');
+    setRejectTarget(listing);
+  };
+
+  const confirmReject = async () => {
+    const target = rejectTarget;
+    const reason = rejectReason.trim();
+    if (!reason) return; // a reason is required
+    setRejectTarget(null);
+    await applyModeration(target, false, reason);
+    setRejectReason('');
   };
 
   const goTo = (p) => {
@@ -186,6 +204,9 @@ export default function Moderation() {
                   <Link href={`/listings/${l.slug || l._id}`} target="_blank" rel="noreferrer">
                     {l.title}
                   </Link>
+                  {l.status === 'rejected' && l.rejectionReason && (
+                    <div className="reject-note">⚠ {l.rejectionReason}</div>
+                  )}
                 </td>
                 <td>{l.type?.replace(/_/g, ' ')}</td>
                 <td>{[l.location?.area, l.location?.district].filter(Boolean).join(', ')}</td>
@@ -200,14 +221,14 @@ export default function Moderation() {
                   <button
                     className="btn btn-primary sm"
                     disabled={busyId === l._id || l.status === 'approved'}
-                    onClick={() => moderate(l, true)}
+                    onClick={() => applyModeration(l, true)}
                   >
                     Approve
                   </button>
                   <button
                     className="btn btn-danger sm"
                     disabled={busyId === l._id || l.status === 'rejected'}
-                    onClick={() => moderate(l, false)}
+                    onClick={() => reject(l)}
                   >
                     Reject
                   </button>
@@ -243,6 +264,37 @@ export default function Moderation() {
             Next →
           </button>
         </nav>
+      )}
+
+      {rejectTarget && (
+        <div className="modal-overlay" onClick={() => setRejectTarget(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Reject listing</h3>
+            <p className="muted">
+              “{rejectTarget.title}” — the reason below is sent to the owner and shown on their listing.
+            </p>
+            <label>Rejection reason</label>
+            <textarea
+              rows={4}
+              value={rejectReason}
+              autoFocus
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g. Images are unclear / rent looks inaccurate / duplicate listing"
+            />
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setRejectTarget(null)}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-danger"
+                disabled={!rejectReason.trim() || busyId === rejectTarget._id}
+                onClick={confirmReject}
+              >
+                Reject listing
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
