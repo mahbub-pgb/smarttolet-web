@@ -18,7 +18,6 @@ export default function Settings() {
     smsApiKeyConfigured: false,
     pwSmsEnabled: false,
     pwSmsTemplate: '',
-    promoMessages: [],
     maintenanceMode: false,
     maintenanceMessage: '',
   });
@@ -54,9 +53,6 @@ export default function Settings() {
           smsApiKeyConfigured: !!s.sms?.apiKey,
           pwSmsEnabled: !!s.passwordChangeSms?.enabled,
           pwSmsTemplate: s.passwordChangeSms?.template || '',
-          promoMessages: Array.isArray(s.promoMessages)
-            ? s.promoMessages.map((m) => ({ title: m.title || '', message: m.message || '' }))
-            : [],
           maintenanceMode: !!s.maintenanceMode,
           maintenanceMessage: s.maintenanceMessage || '',
         }));
@@ -67,17 +63,6 @@ export default function Settings() {
 
   const set = (k) => (e) =>
     setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
-
-  // Predefined promo-message list handlers ({ title, message } items).
-  const setPromo = (i, key) => (e) =>
-    setForm((f) => ({
-      ...f,
-      promoMessages: f.promoMessages.map((m, idx) => (idx === i ? { ...m, [key]: e.target.value } : m)),
-    }));
-  const addPromo = () =>
-    setForm((f) => ({ ...f, promoMessages: [...f.promoMessages, { title: '', message: '' }] }));
-  const removePromo = (i) =>
-    setForm((f) => ({ ...f, promoMessages: f.promoMessages.filter((_, idx) => idx !== i) }));
 
   const save = async (e) => {
     e.preventDefault();
@@ -109,11 +94,6 @@ export default function Settings() {
         enabled: form.pwSmsEnabled,
         template: form.pwSmsTemplate,
       };
-
-      // Predefined promotion messages (keep only entries with both title and message).
-      payload.promoMessages = form.promoMessages
-        .map((m) => ({ title: m.title.trim(), message: m.message.trim() }))
-        .filter((m) => m.title && m.message);
 
       await api.put('/admin/settings', payload);
       setMsg('Settings saved.');
@@ -258,41 +238,6 @@ export default function Settings() {
               Use <code>{'{password}'}</code> where the new password should appear. It is replaced
               with the actual password when the SMS is sent.
             </small>
-
-            <h3 style={{ marginTop: 24 }}>Predefined promotion messages</h3>
-            <small className="muted">
-              These appear in a dropdown on the Promotions page so you can reuse them.
-            </small>
-            {form.promoMessages.map((m, i) => (
-              <div className="promo-item" key={i}>
-                <div className="inline-add">
-                  <input
-                    value={m.title}
-                    onChange={setPromo(i, 'title')}
-                    maxLength={120}
-                    placeholder="Title (e.g. Eid offer)"
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-ghost sm"
-                    onClick={() => removePromo(i)}
-                    aria-label="Remove message"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <textarea
-                  rows={2}
-                  value={m.message}
-                  onChange={setPromo(i, 'message')}
-                  maxLength={1000}
-                  placeholder="Message (e.g. New flats available in Dhanmondi! Call us today.)"
-                />
-              </div>
-            ))}
-            <button type="button" className="btn btn-ghost sm" onClick={addPromo}>
-              + Add message
-            </button>
           </>
         )}
 
