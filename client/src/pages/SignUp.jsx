@@ -80,10 +80,10 @@ export default function SignUp() {
             <input
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
-              placeholder="+8801712345678"
+              placeholder="01712345678"
               required
             />
-            <small className="muted">Format: +8801XXXXXXXXX (Bangladesh)</small>
+            <small className="muted">Enter your Bangladesh mobile, e.g. 01712345678</small>
             <button className="btn btn-primary block" disabled={busy}>
               {busy ? 'Sending…' : 'Send OTP'}
             </button>

@@ -48,7 +48,7 @@ export default function SignIn() {
           <input
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="+8801712345678 or you@example.com"
+            placeholder="01712345678 or you@example.com"
             required
           />
           <label>Password</label>

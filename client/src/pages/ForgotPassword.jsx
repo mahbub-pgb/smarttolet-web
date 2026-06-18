@@ -61,7 +61,7 @@ export default function ForgotPassword() {
             <input
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
-              placeholder="+8801712345678"
+              placeholder="01712345678"
               required
             />
             <button className="btn btn-primary block" disabled={busy}>
