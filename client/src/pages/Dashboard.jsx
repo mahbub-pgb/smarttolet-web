@@ -12,7 +12,10 @@ const STAT_CARDS = [
   { key: 'rejected', label: 'Rejected' },
 ];
 
-export default function Dashboard() {
+const GENDERS = ['male', 'female', 'other'];
+
+// ---- Overview tab: profile summary + listing stats ----
+function Overview() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
@@ -24,28 +27,18 @@ export default function Dashboard() {
       .catch((err) => setError(errMsg(err)));
   }, []);
 
-  // Flatten { total, byStatus:{...} } into a lookup the cards can read.
   const value = (key) =>
     key === 'total' ? stats?.total ?? 0 : stats?.byStatus?.[key] ?? 0;
 
   return (
-    <div className="container">
-      <div className="page-head">
-        <h2>My Dashboard</h2>
-        <Link to="/create" className="btn btn-primary">
-          + New listing
-        </Link>
-      </div>
-
+    <>
       {error && <div className="alert error">{error}</div>}
 
       <div className="card profile-summary">
-        <div>
-          <h3>{user?.fullName || 'Welcome'}</h3>
-          <p className="muted">📞 {user?.mobile}</p>
-          {user?.email && <p className="muted">✉ {user.email}</p>}
-          {user?.isLandlordVerified && <span className="badge verified">Verified landlord</span>}
-        </div>
+        <h3>{user?.fullName || 'Welcome'}</h3>
+        <p className="muted">📞 {user?.mobile}</p>
+        {user?.email && <p className="muted">✉ {user.email}</p>}
+        {user?.isLandlordVerified && <span className="badge verified">Verified landlord</span>}
       </div>
 
       <div className="stat-grid">
@@ -65,6 +58,126 @@ export default function Dashboard() {
           🔒 Change password
         </Link>
       </div>
+    </>
+  );
+}
+
+// Map the user object onto the editable profile form fields.
+function toProfileForm(user) {
+  return {
+    fullName: user?.fullName || '',
+    email: user?.email || '',
+    occupation: user?.occupation || '',
+    address: user?.address || '',
+    gender: user?.gender || '',
+    dateOfBirth: user?.dateOfBirth ? String(user.dateOfBirth).slice(0, 10) : '',
+  };
+}
+
+// ---- Profile tab: edit personal details ----
+function ProfileTab() {
+  const { user, completeProfile } = useAuth();
+  const [form, setForm] = useState(() => toProfileForm(user));
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [msg, setMsg] = useState('');
+
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setMsg('');
+    setBusy(true);
+    try {
+      // Send only filled fields; the endpoint ignores undefined ones.
+      const payload = { fullName: form.fullName };
+      ['email', 'occupation', 'address', 'gender', 'dateOfBirth'].forEach((k) => {
+        if (form[k]) payload[k] = form[k];
+      });
+      await completeProfile(payload);
+      setMsg('Profile updated.');
+    } catch (err) {
+      setError(errMsg(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form className="card" onSubmit={submit} style={{ maxWidth: 560 }}>
+      {error && <div className="alert error">{error}</div>}
+      {msg && <div className="alert info">{msg}</div>}
+
+      <label>Full name</label>
+      <input value={form.fullName} onChange={set('fullName')} required minLength={2} maxLength={120} />
+
+      <label>Email</label>
+      <input type="email" value={form.email} onChange={set('email')} />
+
+      <label>Mobile</label>
+      <input value={user?.mobile || ''} disabled />
+      <small className="muted">Mobile is your login and can't be changed here.</small>
+
+      <div className="row">
+        <div>
+          <label>Gender</label>
+          <select value={form.gender} onChange={set('gender')}>
+            <option value="">—</option>
+            {GENDERS.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>Date of birth</label>
+          <input type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} />
+        </div>
+      </div>
+
+      <label>Occupation</label>
+      <input value={form.occupation} onChange={set('occupation')} maxLength={100} />
+
+      <label>Address</label>
+      <textarea rows={2} value={form.address} onChange={set('address')} maxLength={300} />
+
+      <button className="btn btn-primary block" disabled={busy}>
+        {busy ? 'Saving…' : 'Save profile'}
+      </button>
+    </form>
+  );
+}
+
+export default function Dashboard() {
+  const [tab, setTab] = useState('overview');
+
+  return (
+    <div className="container">
+      <div className="page-head">
+        <h2>My Dashboard</h2>
+        <Link to="/create" className="btn btn-primary">
+          + New listing
+        </Link>
+      </div>
+
+      <div className="tabs">
+        <button
+          className={`tab ${tab === 'overview' ? 'active' : ''}`}
+          onClick={() => setTab('overview')}
+        >
+          Overview
+        </button>
+        <button
+          className={`tab ${tab === 'profile' ? 'active' : ''}`}
+          onClick={() => setTab('profile')}
+        >
+          Edit Profile
+        </button>
+      </div>
+
+      {tab === 'overview' ? <Overview /> : <ProfileTab />}
     </div>
   );
 }

@@ -28,7 +28,6 @@ export default function Navbar() {
                 Admin Panel
               </Link>
             )}
-            <span className="nav-user">{user.fullName || user.mobile}</span>
             <button className="btn btn-ghost" onClick={doLogout}>
               Logout
             </button>

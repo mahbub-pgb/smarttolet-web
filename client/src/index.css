@@ -328,6 +328,11 @@ a.directions-btn:hover { text-decoration: none; }
 .status.gray { background: #eceeed; color: #6b7a73; }
 .status.blue { background: #eaf4ff; color: #1d5fad; }
 
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+.tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 16px; cursor: pointer; font: inherit; color: var(--muted); margin-bottom: -1px; }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
 /* User dashboard */
 .profile-summary { margin-bottom: 18px; }
 .profile-summary h3 { margin: 0 0 4px; }
