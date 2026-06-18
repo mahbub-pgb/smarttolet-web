@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { errMsg } from "@/lib/apiClient";
+import { useAuth } from "@/lib/AuthContext";
 import MapPicker from "./map/MapPicker";
 
 const TYPES = [
@@ -84,6 +85,7 @@ export default function ListingForm({
   submitLabel = "Save",
   onSubmit,
 }) {
+  const { isStaff } = useAuth();
   const [form, setForm] = useState(() => toForm(initial));
   const [images, setImages] = useState([]);
   const [coords, setCoords] = useState(() => initialCoords(initial));
@@ -350,6 +352,7 @@ export default function ListingForm({
 
       <label>Visibility</label>
       <select value={form.status} onChange={set("status")}>
+        {isStaff && <option value="approved">Publish (go live now)</option>}
         <option value="pending">Submit for review</option>
         <option value="draft">Save as draft</option>
       </select>
