@@ -133,6 +133,19 @@ a.btn:hover { text-decoration: none; }
 .rent { font-weight: 700; color: var(--primary-dark); margin-top: 6px; }
 .rent.big { font-size: 24px; margin: 8px 0; }
 
+/* Results + pagination */
+.results-line { margin: 14px 0 4px; font-size: 14px; }
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 28px 0 8px;
+}
+.pagination .btn.sm { padding: 7px 12px; min-width: 38px; }
+.page-gap { padding: 0 4px; color: var(--muted); }
+
 /* Filters */
 .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
 .filters input, .filters select { flex: 1; min-width: 150px; width: auto; }
