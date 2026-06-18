@@ -4,6 +4,7 @@ import { apiGet } from '@/lib/apiServer';
 import { SITE_URL, SITE_NAME } from '@/lib/constants';
 import Gallery from '@/components/Gallery';
 import MapView from '@/components/map/MapView';
+import DirectionsButton from '@/components/DirectionsButton';
 
 export const revalidate = 300; // ISR: refresh listing pages every 5 min
 
@@ -204,14 +205,7 @@ export default async function ListingDetailPage({ params }) {
             <>
               <h3>Location</h3>
               <MapView lat={coords[1]} lng={coords[0]} />
-              <a
-                className="btn btn-primary directions-btn"
-                href={`https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                🧭 Get directions
-              </a>
+              <DirectionsButton lat={coords[1]} lng={coords[0]} />
             </>
           )}
 
