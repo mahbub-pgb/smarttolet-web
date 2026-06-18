@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { GoogleMap, Marker, Autocomplete, useJsApiLoader } from '@react-google-maps/api';
 import useMapsKey from './useMapsKey';
 import { extractLocation } from './geocode';
@@ -14,10 +14,12 @@ function PickerInner({ apiKey, value, onChange }) {
   });
 
   const [marker, setMarker] = useState(value?.lat ? value : null);
+  const [locating, setLocating] = useState(false);
   // Stable initial center/zoom so unrelated parent re-renders don't reset the map.
   const [initialCenter] = useState(value?.lat ? value : DEFAULT_CENTER);
   const mapRef = useRef(null);
   const autoRef = useRef(null);
+  const didAutoLocate = useRef(false);
 
   const reverseGeocode = useCallback(
     (lat, lng) => {
@@ -39,6 +41,28 @@ function PickerInner({ apiKey, value, onChange }) {
     [reverseGeocode],
   );
 
+  // Ask the browser for the device's current location and pin it.
+  const locateMe = useCallback(() => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        place(pos.coords.latitude, pos.coords.longitude, true);
+      },
+      () => setLocating(false), // permission denied / unavailable: keep default
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }, [place]);
+
+  // On first load with no existing pin, auto-locate the user.
+  useEffect(() => {
+    if (isLoaded && !marker && !didAutoLocate.current) {
+      didAutoLocate.current = true;
+      locateMe();
+    }
+  }, [isLoaded, marker, locateMe]);
+
   if (loadError) return <div className="alert error">Failed to load Google Maps.</div>;
   if (!isLoaded) return <div className="map-placeholder">Loading map…</div>;
 
@@ -56,6 +80,15 @@ function PickerInner({ apiKey, value, onChange }) {
       >
         <input className="map-search" placeholder="Search a place or address…" />
       </Autocomplete>
+
+      <button
+        type="button"
+        className="btn btn-ghost sm map-locate"
+        onClick={locateMe}
+        disabled={locating}
+      >
+        {locating ? 'Locating…' : '📍 Use my current location'}
+      </button>
 
       <GoogleMap
         mapContainerStyle={containerStyle}

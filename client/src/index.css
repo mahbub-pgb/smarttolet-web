@@ -109,6 +109,7 @@ a.btn:hover { text-decoration: none; }
   color: var(--muted);
 }
 .picked-address { margin: 8px 0 0; font-weight: 600; }
+.map-locate { margin-bottom: 8px; }
 
 /* Image thumbnails (edit form) */
 .thumb-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
