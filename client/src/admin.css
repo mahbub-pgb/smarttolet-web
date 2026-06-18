@@ -67,8 +67,25 @@
 .admin-area .stat-value { font-size: 30px; font-weight: 700; margin-top: 8px; }
 
 /* Toolbar / table extras */
-.admin-area .toolbar { display: flex; gap: 10px; margin: 16px 0; }
+.admin-area .toolbar { display: flex; gap: 12px; margin: 16px 0; }
 .admin-area .toolbar input { max-width: 320px; width: auto; }
+.admin-area .toolbar.wrap { flex-wrap: wrap; align-items: flex-end; }
+.admin-area .toolbar label.inline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0;
+}
+.admin-area .toolbar label.inline select { width: auto; text-transform: none; font-weight: 400; }
+.admin-area .toolbar form.inline { display: flex; gap: 8px; align-items: center; }
+.admin-area .toolbar form.inline.grow { flex: 1; min-width: 220px; }
+.admin-area .toolbar form.inline input { flex: 1; max-width: none; width: auto; }
+.admin-area .table td a { color: var(--primary); }
 .admin-area .role { text-transform: capitalize; font-weight: 600; }
 .admin-area .badge { background: #e8eefb; color: var(--primary-dark); }
 .admin-area label.checkbox { display: flex; align-items: center; gap: 8px; }
