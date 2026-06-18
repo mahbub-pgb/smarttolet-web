@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, errMsg } from '../api/client';
+import ListingFilters from '../components/ListingFilters';
 
-const TYPES = [
-  'apartment', 'flat', 'family_house', 'bachelor_room', 'sublet',
-  'hostel', 'mess', 'office', 'shop', 'commercial_space',
-];
 const PAGE_SIZE = 12;
 
 function ListingCard({ listing }) {
@@ -45,7 +42,6 @@ export default function Home() {
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState({ keyword: '', type: '', district: '' });
   const [applied, setApplied] = useState({});
   const [page, setPage] = useState(1);
 
@@ -75,10 +71,9 @@ export default function Home() {
     };
   }, [applied, page]);
 
-  const onSearch = (e) => {
-    e.preventDefault();
+  const onApply = (params) => {
     setPage(1);
-    setApplied(filters);
+    setApplied(params);
   };
 
   const goTo = (p) => {
@@ -93,30 +88,7 @@ export default function Home() {
         <p className="muted">Browse verified rental listings across the country.</p>
       </section>
 
-      <form className="filters" onSubmit={onSearch}>
-        <input
-          placeholder="Search keyword…"
-          value={filters.keyword}
-          onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
-        />
-        <select
-          value={filters.type}
-          onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-        >
-          <option value="">All types</option>
-          {TYPES.map((t) => (
-            <option key={t} value={t}>
-              {t.replace(/_/g, ' ')}
-            </option>
-          ))}
-        </select>
-        <input
-          placeholder="District"
-          value={filters.district}
-          onChange={(e) => setFilters({ ...filters, district: e.target.value })}
-        />
-        <button className="btn btn-primary">Search</button>
-      </form>
+      <ListingFilters showSort onApply={onApply} />
 
       <div className="browse-bar">
         {meta && (

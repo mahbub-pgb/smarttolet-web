@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import { api, errMsg } from '../api/client';
+import ListingFilters from '../components/ListingFilters';
 import useMapsKey from '../components/map/useMapsKey';
 import { MAPS_LIBRARIES, MAPS_LOADER_ID, DEFAULT_CENTER } from '../components/map/mapsConfig';
 
@@ -78,14 +79,27 @@ export default function ListingsMap() {
   const [listings, setListings] = useState([]);
   const [error, setError] = useState('');
   const [fetching, setFetching] = useState(true);
+  const [params, setParams] = useState({});
 
   useEffect(() => {
+    let cancelled = false;
+    setFetching(true);
+    setError('');
     api
-      .get('/listings/map')
-      .then(({ data }) => setListings(data.data.listings || []))
-      .catch((err) => setError(errMsg(err)))
-      .finally(() => setFetching(false));
-  }, []);
+      .get('/listings/map', { params })
+      .then(({ data }) => {
+        if (!cancelled) setListings(data.data.listings || []);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(errMsg(err));
+      })
+      .finally(() => {
+        if (!cancelled) setFetching(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [params]);
 
   return (
     <div className="container">
@@ -95,6 +109,8 @@ export default function ListingsMap() {
           ☰ List view
         </Link>
       </div>
+
+      <ListingFilters onApply={setParams} />
 
       {error && <div className="alert error">{error}</div>}
 
