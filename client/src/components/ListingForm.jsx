@@ -14,7 +14,6 @@ const TYPES = [
   "shop",
   "commercial_space",
 ];
-const FURNISHED = ["furnished", "semi_furnished", "unfurnished"];
 
 // Amenity checkboxes shown for every listing. `group` is the nested object the
 // flag lives under on the backend (details vs utilities); `key` is the field.
@@ -55,8 +54,8 @@ function toForm(listing) {
     advanceAmount: l.advanceAmount ?? "",
     bedrooms: l.details?.bedrooms ?? "",
     bathrooms: l.details?.bathrooms ?? "",
+    balconies: l.details?.balconies ?? "",
     areaSqft: l.details?.areaSqft ?? "",
-    furnishedStatus: l.details?.furnishedStatus || "",
     status: l.status === "draft" ? "draft" : "pending",
   };
   AMENITIES.forEach((a) => {
@@ -121,8 +120,8 @@ export default function ListingForm({
       const details = {};
       if (form.bedrooms !== "") details.bedrooms = Number(form.bedrooms);
       if (form.bathrooms !== "") details.bathrooms = Number(form.bathrooms);
+      if (form.balconies !== "") details.balconies = Number(form.balconies);
       if (form.areaSqft !== "") details.areaSqft = Number(form.areaSqft);
-      if (form.furnishedStatus) details.furnishedStatus = form.furnishedStatus;
 
       // Regroup the flattened amenity checkboxes back into details/utilities.
       const utilities = {};
@@ -247,18 +246,13 @@ export default function ListingForm({
           />
         </div>
         <div>
-          <label>Furnishing</label>
-          <select
-            value={form.furnishedStatus}
-            onChange={set("furnishedStatus")}
-          >
-            <option value="">—</option>
-            {FURNISHED.map((f) => (
-              <option key={f} value={f}>
-                {f.replace(/_/g, " ")}
-              </option>
-            ))}
-          </select>
+          <label>Balconies</label>
+          <input
+            type="number"
+            value={form.balconies}
+            onChange={set("balconies")}
+            min={0}
+          />
         </div>
       </div>
 

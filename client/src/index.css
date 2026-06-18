@@ -296,6 +296,14 @@ a.directions-btn:hover { text-decoration: none; }
 .spec-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 14px 0; color: var(--muted); }
 .owner-box { margin-top: 20px; padding: 16px; background: #f0f3f1; border-radius: var(--radius); }
 
+/* Key/value fact lists (listing detail) */
+.fact-list { list-style: none; padding: 0; margin: 10px 0; }
+.fact-list li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.fact-list li span { color: var(--muted); }
+/* Amenity / occupancy tag chips */
+.tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.tag { background: #eef4f1; color: #1f6b4a; border-radius: 16px; padding: 5px 12px; font-size: 13px; font-weight: 500; }
+
 /* Table */
 .table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius); overflow: hidden; }
 .table th, .table td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 14px; }
