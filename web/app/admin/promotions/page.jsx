@@ -53,10 +53,11 @@ export default function Promotions() {
       const r = data.data;
       setBalance(r.balance);
       setProvider(r.provider);
-      setMsg(
-        `Sent to ${r.recipients} number${r.recipients === 1 ? '' : 's'}` +
-          (r.delivered ? '.' : ' — gateway did not accept the request.'),
-      );
+      if (r.delivered) {
+        setMsg(`Sent to ${r.recipients} number${r.recipients === 1 ? '' : 's'}.`);
+      } else {
+        setError(`Gateway rejected the SMS: ${r.reason || 'unknown error'}`);
+      }
     } catch (err) {
       setError(errMsg(err));
     } finally {
