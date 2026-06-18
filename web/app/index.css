@@ -334,8 +334,14 @@ a.directions-btn:hover { text-decoration: none; }
 .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
 
 /* User dashboard */
-.profile-summary { margin-bottom: 18px; }
+.profile-summary { margin-bottom: 18px; display: flex; align-items: center; gap: 16px; }
 .profile-summary h3 { margin: 0 0 4px; }
+
+/* Profile image */
+.avatar { border-radius: 50%; object-fit: cover; border: 1px solid var(--border); background: #f0f3f1; flex-shrink: 0; }
+.avatar-fallback { display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary); }
+.avatar-edit { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+small.block { display: block; margin-top: 4px; }
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
 .stat-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
 .stat-value { font-size: 28px; font-weight: 700; color: var(--primary); }

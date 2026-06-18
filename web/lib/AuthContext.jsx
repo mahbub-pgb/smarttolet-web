@@ -56,6 +56,14 @@ export function AuthProvider({ children }) {
     return data.data.user;
   };
 
+  const uploadAvatar = async (file) => {
+    const fd = new FormData();
+    fd.append('profileImage', file);
+    const { data } = await api.post('/auth/avatar', fd);
+    setUser(data.data.user);
+    return data.data.user;
+  };
+
   const changePassword = async (currentPassword, newPassword) => {
     await api.post('/auth/password/change', { currentPassword, newPassword });
   };
@@ -85,7 +93,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         user, loading, isStaff, login, requestOtp, verifyOtp, completeProfile,
-        changePassword, requestPasswordReset, resetPassword, logout, setUser,
+        uploadAvatar, changePassword, requestPasswordReset, resetPassword, logout, setUser,
       }}
     >
       {children}
