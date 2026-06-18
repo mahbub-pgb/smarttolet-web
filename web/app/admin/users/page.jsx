@@ -3,11 +3,19 @@
 import { useEffect, useState } from 'react';
 import { api, errMsg } from '@/lib/apiClient';
 
+const ROLE_OPTIONS = ['user', 'moderator', 'admin'];
+const EMPTY_FORM = { fullName: '', mobile: '', email: '', password: '', role: 'user' };
+
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  // Create-user modal state.
+  const [showCreate, setShowCreate] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [creating, setCreating] = useState(false);
+  const [createErr, setCreateErr] = useState('');
 
   const load = async (params = {}) => {
     setLoading(true);
@@ -48,9 +56,42 @@ export default function Users() {
     }
   };
 
+  const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setCreateErr('');
+    setShowCreate(true);
+  };
+
+  const createUser = async (e) => {
+    e.preventDefault();
+    setCreateErr('');
+    setCreating(true);
+    try {
+      const payload = {
+        fullName: form.fullName,
+        mobile: form.mobile,
+        password: form.password,
+        role: form.role,
+      };
+      if (form.email) payload.email = form.email;
+      await api.post('/admin/users', payload);
+      setShowCreate(false);
+      await load(search ? { search } : {});
+    } catch (err) {
+      setCreateErr(errMsg(err));
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div>
-      <h1>Users</h1>
+      <div className="page-head">
+        <h1>Users</h1>
+        <button className="btn btn-primary" onClick={openCreate}>+ New user</button>
+      </div>
       <form
         className="toolbar"
         onSubmit={(e) => {
@@ -106,6 +147,55 @@ export default function Users() {
             ))}
           </tbody>
         </table>
+      )}
+
+      {showCreate && (
+        <div className="modal-overlay" onClick={() => setShowCreate(false)}>
+          <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={createUser}>
+            <h3>Create user</h3>
+            {createErr && <div className="alert error">{createErr}</div>}
+
+            <label>Full name</label>
+            <input value={form.fullName} onChange={setField('fullName')} required minLength={2} maxLength={120} />
+
+            <label>Mobile</label>
+            <input
+              value={form.mobile}
+              onChange={setField('mobile')}
+              required
+              placeholder="01XXXXXXXXX"
+            />
+
+            <label>Email (optional)</label>
+            <input type="email" value={form.email} onChange={setField('email')} />
+
+            <label>Password</label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={setField('password')}
+              required
+              autoComplete="new-password"
+              placeholder="Min 8 chars, with upper, lower & number"
+            />
+
+            <label>Role</label>
+            <select value={form.role} onChange={setField('role')}>
+              {ROLE_OPTIONS.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+
+            <div className="modal-actions">
+              <button type="button" className="btn btn-ghost" onClick={() => setShowCreate(false)}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={creating}>
+                {creating ? 'Creating…' : 'Create user'}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
     </div>
   );
