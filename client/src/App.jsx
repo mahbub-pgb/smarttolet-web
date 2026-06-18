@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/admin/AdminRoute';
 import Home from './pages/Home';
+import ListingsMap from './pages/ListingsMap';
 import ListingDetail from './pages/ListingDetail';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -25,6 +26,7 @@ export default function App() {
         <Routes>
           {/* ---- Public / front-end ---- */}
           <Route path="/" element={<Home />} />
+          <Route path="/map" element={<ListingsMap />} />
           <Route path="/listings/:slug" element={<ListingDetail />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />

@@ -118,12 +118,17 @@ export default function Home() {
         <button className="btn btn-primary">Search</button>
       </form>
 
-      {meta && (
-        <p className="muted results-line">
-          {meta.total.toLocaleString()} listing{meta.total === 1 ? '' : 's'} found · page {meta.page} of{' '}
-          {meta.totalPages}
-        </p>
-      )}
+      <div className="browse-bar">
+        {meta && (
+          <p className="muted results-line">
+            {meta.total.toLocaleString()} listing{meta.total === 1 ? '' : 's'} found · page {meta.page} of{' '}
+            {meta.totalPages}
+          </p>
+        )}
+        <Link to="/map" className="btn btn-ghost sm">
+          🗺 Map view
+        </Link>
+      </div>
 
       {error && <div className="alert error">{error}</div>}
       {loading ? (

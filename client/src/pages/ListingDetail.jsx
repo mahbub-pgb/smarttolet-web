@@ -56,6 +56,14 @@ export default function ListingDetail() {
             <>
               <h3>Location</h3>
               <MapView lat={coords[1]} lng={coords[0]} />
+              <a
+                className="btn btn-primary directions-btn"
+                href={`https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                🧭 Get directions
+              </a>
             </>
           )}
           {listing.owner && (

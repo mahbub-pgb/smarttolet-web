@@ -110,6 +110,20 @@ a.btn:hover { text-decoration: none; }
 }
 .picked-address { margin: 8px 0 0; font-weight: 600; }
 .map-locate { margin-bottom: 8px; }
+.directions-btn { display: inline-block; margin-top: 12px; }
+a.directions-btn:hover { text-decoration: none; }
+
+/* Browse bar (results + map link) */
+.browse-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 4px; }
+.browse-bar .results-line { margin: 0; }
+
+/* Map InfoWindow summary */
+.map-info { max-width: 220px; }
+.map-info-img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; margin-bottom: 6px; }
+.map-info-title { display: block; font-size: 15px; margin-bottom: 2px; }
+.map-info-rent { color: var(--primary-dark); font-weight: 700; }
+.map-info-meta { color: var(--muted); font-size: 13px; margin-bottom: 6px; text-transform: capitalize; }
+.map-info-link { font-weight: 600; font-size: 14px; }
 
 /* Image thumbnails (edit form) */
 .thumb-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }

@@ -17,6 +17,7 @@ export default function Navbar() {
       </Link>
       <nav className="nav-links">
         <Link to="/">Browse</Link>
+        <Link to="/map">Map</Link>
         {user ? (
           <>
             <Link to="/create">+ Post Listing</Link>
