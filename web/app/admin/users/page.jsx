@@ -4,7 +4,23 @@ import { useEffect, useState } from 'react';
 import { api, errMsg } from '@/lib/apiClient';
 
 const ROLE_OPTIONS = ['user', 'moderator', 'admin'];
+const STATUS_OPTIONS = ['active', 'suspended', 'pending'];
+const GENDER_OPTIONS = ['male', 'female', 'other'];
 const EMPTY_FORM = { fullName: '', mobile: '', email: '', password: '', role: 'user' };
+
+const toEditForm = (u) => ({
+  fullName: u.fullName || '',
+  mobile: u.mobile || '',
+  email: u.email || '',
+  role: u.role || 'user',
+  status: u.status || 'active',
+  isLandlordVerified: !!u.isLandlordVerified,
+  occupation: u.occupation || '',
+  address: u.address || '',
+  gender: u.gender || '',
+  dateOfBirth: u.dateOfBirth ? String(u.dateOfBirth).slice(0, 10) : '',
+  password: '',
+});
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -16,6 +32,11 @@ export default function Users() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [creating, setCreating] = useState(false);
   const [createErr, setCreateErr] = useState('');
+  // Edit-user modal state.
+  const [editUser, setEditUser] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editErr, setEditErr] = useState('');
 
   const load = async (params = {}) => {
     setLoading(true);
@@ -86,6 +107,43 @@ export default function Users() {
     }
   };
 
+  const openEdit = (u) => {
+    setEditUser(u);
+    setEditForm(toEditForm(u));
+    setEditErr('');
+  };
+
+  const setEditField = (k) => (e) =>
+    setEditForm((f) => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
+
+  const saveEdit = async (e) => {
+    e.preventDefault();
+    setEditErr('');
+    setSavingEdit(true);
+    try {
+      const payload = {
+        fullName: editForm.fullName,
+        mobile: editForm.mobile,
+        role: editForm.role,
+        status: editForm.status,
+        isLandlordVerified: editForm.isLandlordVerified,
+        occupation: editForm.occupation,
+        address: editForm.address,
+        gender: editForm.gender || undefined,
+        dateOfBirth: editForm.dateOfBirth || undefined,
+      };
+      if (editForm.email) payload.email = editForm.email;
+      if (editForm.password) payload.password = editForm.password;
+      const { data } = await api.patch(`/admin/users/${editUser._id}`, payload);
+      patch(editUser._id, data.data.user);
+      setEditUser(null);
+    } catch (err) {
+      setEditErr(errMsg(err));
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   return (
     <div>
       <div className="page-head">
@@ -136,6 +194,9 @@ export default function Users() {
                 </td>
                 <td>{u.isLandlordVerified ? '✅' : '—'}</td>
                 <td className="actions">
+                  <button className="btn btn-ghost sm" onClick={() => openEdit(u)}>
+                    Edit
+                  </button>
                   <button className="btn btn-ghost sm" onClick={() => toggleStatus(u)}>
                     {u.status === 'suspended' ? 'Activate' : 'Suspend'}
                   </button>
@@ -192,6 +253,95 @@ export default function Users() {
               </button>
               <button type="submit" className="btn btn-primary" disabled={creating}>
                 {creating ? 'Creating…' : 'Create user'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {editUser && editForm && (
+        <div className="modal-overlay" onClick={() => setEditUser(null)}>
+          <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={saveEdit}>
+            <h3>Edit user</h3>
+            {editErr && <div className="alert error">{editErr}</div>}
+
+            <label>Full name</label>
+            <input value={editForm.fullName} onChange={setEditField('fullName')} minLength={2} maxLength={120} />
+
+            <label>Mobile</label>
+            <input value={editForm.mobile} onChange={setEditField('mobile')} placeholder="01XXXXXXXXX" />
+
+            <label>Email</label>
+            <input type="email" value={editForm.email} onChange={setEditField('email')} />
+
+            <div className="row">
+              <div>
+                <label>Role</label>
+                <select value={editForm.role} onChange={setEditField('role')}>
+                  {ROLE_OPTIONS.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Status</label>
+                <select value={editForm.status} onChange={setEditField('status')}>
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="row">
+              <div>
+                <label>Gender</label>
+                <select value={editForm.gender} onChange={setEditField('gender')}>
+                  <option value="">—</option>
+                  {GENDER_OPTIONS.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Date of birth</label>
+                <input type="date" value={editForm.dateOfBirth} onChange={setEditField('dateOfBirth')} />
+              </div>
+            </div>
+
+            <label>Occupation</label>
+            <input value={editForm.occupation} onChange={setEditField('occupation')} maxLength={100} />
+
+            <label>Address</label>
+            <textarea rows={2} value={editForm.address} onChange={setEditField('address')} maxLength={300} />
+
+            <label className="checkbox">
+              <input
+                type="checkbox"
+                checked={editForm.isLandlordVerified}
+                onChange={setEditField('isLandlordVerified')}
+              />
+              Verified landlord
+            </label>
+
+            <label>New password</label>
+            <input
+              type="password"
+              value={editForm.password}
+              onChange={setEditField('password')}
+              autoComplete="new-password"
+              placeholder="Leave blank to keep current"
+            />
+            <small className="muted">
+              Setting a new password signs the user out of existing sessions.
+            </small>
+
+            <div className="modal-actions">
+              <button type="button" className="btn btn-ghost" onClick={() => setEditUser(null)}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={savingEdit}>
+                {savingEdit ? 'Saving…' : 'Save changes'}
               </button>
             </div>
           </form>
