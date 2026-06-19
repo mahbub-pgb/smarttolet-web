@@ -1,5 +1,7 @@
 import Gallery from "@/components/Gallery";
 import ListingPrivateInfo from "@/components/ListingPrivateInfo";
+import FavoriteButton from "@/components/FavoriteButton";
+import CompareButton from "@/components/CompareButton";
 import { apiGet } from "@/lib/apiServer";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import Link from "next/link";
@@ -165,6 +167,10 @@ export default async function ListingDetailPage({ params }) {
           <h1>{listing.title}</h1>
           <div className="rent big">
             ৳ {Number(listing.monthlyRent).toLocaleString()}/mo
+          </div>
+          <div className="detail-actions">
+            <FavoriteButton listingId={listing._id} />
+            <CompareButton listing={listing} label />
           </div>
           <div className="spec-row">
             {d.bedrooms != null && <span>🛏 {d.bedrooms} bed</span>}

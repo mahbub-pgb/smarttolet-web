@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import ListingCard from '@/components/ListingCard';
 import { api, errMsg } from '@/lib/apiClient';
 import { useAuth } from '@/lib/AuthContext';
+import { useFavorites } from '@/lib/FavoritesContext';
 
 // Circular profile image with a "?" initial fallback when no image is set.
 function Avatar({ user, size = 64 }) {
@@ -68,6 +71,28 @@ function Overview() {
       <div className="dash-actions">
         <Link href="/my-listings" className="btn btn-ghost">📋 View all my listings</Link>
         <Link href="/change-password" className="btn btn-ghost">🔒 Change password</Link>
+      </div>
+    </>
+  );
+}
+
+function FavoritesTab() {
+  const { favorites, loading } = useFavorites();
+
+  if (loading) return <p>Loading…</p>;
+  if (!favorites.length) {
+    return (
+      <p className="muted">
+        No favorites yet. Tap the ♡ heart on any listing to save it here.{' '}
+        <Link href="/">Browse listings →</Link>
+      </p>
+    );
+  }
+  return (
+    <>
+      <p className="muted">{favorites.length} saved listing{favorites.length === 1 ? '' : 's'}</p>
+      <div className="grid">
+        {favorites.map((f) => f.listing && <ListingCard key={f.listing._id} listing={f.listing} />)}
       </div>
     </>
   );
@@ -206,7 +231,9 @@ function ProfileTab() {
 }
 
 function DashboardInner() {
-  const [tab, setTab] = useState('overview');
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState(searchParams.get('tab') === 'favorites' ? 'favorites' : 'overview');
+
   return (
     <div className="container">
       <div className="page-head">
@@ -218,12 +245,17 @@ function DashboardInner() {
         <button className={`tab ${tab === 'overview' ? 'active' : ''}`} onClick={() => setTab('overview')}>
           Overview
         </button>
+        <button className={`tab ${tab === 'favorites' ? 'active' : ''}`} onClick={() => setTab('favorites')}>
+          ♥ Favorites
+        </button>
         <button className={`tab ${tab === 'profile' ? 'active' : ''}`} onClick={() => setTab('profile')}>
           Edit Profile
         </button>
       </div>
 
-      {tab === 'overview' ? <Overview /> : <ProfileTab />}
+      {tab === 'overview' && <Overview />}
+      {tab === 'favorites' && <FavoritesTab />}
+      {tab === 'profile' && <ProfileTab />}
     </div>
   );
 }
@@ -231,7 +263,9 @@ function DashboardInner() {
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <DashboardInner />
+      <Suspense fallback={<div className="container">Loading…</div>}>
+        <DashboardInner />
+      </Suspense>
     </ProtectedRoute>
   );
 }
