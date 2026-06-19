@@ -116,3 +116,41 @@
   overflow: hidden;
 }
 .admin-area .mod-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* Blog: status tabs */
+.admin-area .tabs { display: flex; gap: 6px; }
+.admin-area .tab { background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.admin-area .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* Blog: inline add (category/tag) */
+.admin-area .inline-add { display: flex; gap: 6px; margin-top: 6px; }
+.admin-area .inline-add input { flex: 1; width: auto; }
+
+/* Blog: taxonomy manager */
+.admin-area .taxonomy { margin-bottom: 18px; }
+.admin-area .chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.admin-area .chip-list .tag { display: inline-flex; align-items: center; gap: 6px; }
+.admin-area .chip-x { background: none; border: none; color: inherit; cursor: pointer; font-size: 12px; padding: 0; line-height: 1; opacity: 0.6; }
+.admin-area .chip-x:hover { opacity: 1; }
+
+/* Blog editor */
+.admin-area .blog-editor h4 { margin: 22px 0 8px; }
+.admin-area .cover-row { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 8px; }
+.admin-area .cover-thumb { width: 200px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: #eef1f5; }
+.admin-area .cover-thumb.placeholder { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; }
+.admin-area .cover-actions { display: flex; flex-direction: column; gap: 8px; }
+.admin-area .tag-pick { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 8px 0; }
+.admin-area .tag-pick label.checkbox { font-size: 14px; }
+
+.admin-area .blocks { display: flex; flex-direction: column; gap: 12px; }
+.admin-area .block { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #fafbfc; }
+.admin-area .block-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.admin-area .block-type { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.admin-area .block-tools { display: flex; gap: 4px; }
+.admin-area .block-tools .btn.sm { margin-right: 0; }
+.admin-area .block-img { max-width: 100%; max-height: 240px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px; display: block; }
+.admin-area .block input + input { margin-top: 8px; }
+
+.admin-area .add-block-bar { display: flex; gap: 8px; margin: 12px 0 4px; }
+.admin-area .editor-actions { display: flex; align-items: center; gap: 10px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+.admin-area .editor-actions .spacer { flex: 1; }

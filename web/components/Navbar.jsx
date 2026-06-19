@@ -21,6 +21,7 @@ export default function Navbar() {
       <nav className="nav-links">
         <Link href="/">All Tolet</Link>
         <Link href="/map">MapView </Link>
+        <Link href="/blog">Blog</Link>
         {user ? (
           <>
             <Link href="/create">+ Post Listing</Link>

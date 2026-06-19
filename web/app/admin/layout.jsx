@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/AuthContext';
 const NAV = [
   { href: '/admin', label: 'Dashboard', exact: true },
   { href: '/admin/moderation', label: 'Moderation' },
+  { href: '/admin/blog', label: 'Blog' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/settings', label: 'Settings' },
   { href: '/admin/promotions', label: 'Promotions' },
