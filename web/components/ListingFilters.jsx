@@ -29,7 +29,7 @@ const taka = (n) => `৳${Number(n).toLocaleString()}${n >= PRICE_MAX ? '+' : ''
  * server can render filtered, paginated, shareable results. `showSort` adds the
  * sort control (grid only).
  */
-export default function ListingFilters({ showSort = false, basePath = '/' }) {
+export default function ListingFilters({ showSort = false, basePath = '/', onReset }) {
   const router = useRouter();
   const sp = useSearchParams();
 
@@ -78,6 +78,7 @@ export default function ListingFilters({ showSort = false, basePath = '/' }) {
     setPrice({ min: PRICE_MIN, max: PRICE_MAX });
     setAmenities(Object.fromEntries(AMENITIES.map((a) => [a.key, false])));
     setOpen(false); // collapse the expanded filters when clearing
+    onReset?.(); // let the parent clear any extra state (e.g. the map's drawn area)
     router.push(basePath);
   };
 
