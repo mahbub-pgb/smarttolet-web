@@ -163,3 +163,41 @@
 .admin-area .add-block-bar { display: flex; gap: 8px; margin: 12px 0 4px; }
 .admin-area .editor-actions { display: flex; align-items: center; gap: 10px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
 .admin-area .editor-actions .spacer { flex: 1; }
+
+/* ===== Admin responsive ===== */
+@media (max-width: 900px) {
+  /* Sidebar becomes a top bar; its nav scrolls horizontally. */
+  .admin-area .shell { flex-direction: column; min-height: auto; }
+  .admin-area .sidebar { width: auto; padding: 12px 14px; }
+  .admin-area .logo { margin-bottom: 10px; }
+  .admin-area .sidebar nav {
+    flex-direction: row;
+    gap: 6px;
+    flex: none;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .admin-area .sidebar nav a { white-space: nowrap; }
+  .admin-area .sidebar-foot {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  .admin-area .sidebar-foot .view-site,
+  .admin-area .who { margin-bottom: 0; }
+  .admin-area .sidebar-foot .btn.block { width: auto; }
+  .admin-area .content { padding: 20px 16px; }
+}
+
+@media (max-width: 760px) {
+  /* Wide admin tables scroll instead of overflowing. */
+  .admin-area .table { display: block; overflow-x: auto; white-space: nowrap; }
+  .admin-area .toolbar { flex-direction: column; align-items: stretch; }
+  .admin-area .toolbar input { max-width: none; }
+  .admin-area .cover-row { flex-wrap: wrap; }
+  .admin-area .editor-actions { flex-wrap: wrap; }
+  .admin-area .mod-card { grid-template-columns: 1fr; }
+}
