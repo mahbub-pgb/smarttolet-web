@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { apiGet, apiGetWithMeta } from "@/lib/apiServer";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { cldThumb } from "@/lib/img";
 
 export const revalidate = 120; // ISR: refresh the blog index every 2 min
 
@@ -120,7 +121,12 @@ export default async function BlogIndexPage({ searchParams }) {
             <Link key={post._id} href={`/blog/${post.slug}`} className="blog-card">
               {post.coverImage?.url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img className="blog-card-cover" src={post.coverImage.url} alt={post.title} />
+                <img
+                  className="blog-card-cover"
+                  src={cldThumb(post.coverImage.url, 400)}
+                  alt={post.title}
+                  loading="lazy"
+                />
               ) : (
                 <div className="blog-card-cover placeholder">📝</div>
               )}

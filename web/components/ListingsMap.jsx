@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { cldThumb } from '@/lib/img';
 import {
   GoogleMap,
   Marker,
@@ -178,7 +179,7 @@ function MapInner({ apiKey, listings, zoom, center, radiusKm, drawMode, area, on
           <div className="map-info">
             {active.images?.[0]?.url && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={active.images[0].url} alt={active.title} className="map-info-img" />
+              <img src={cldThumb(active.images[0].url, 240)} alt={active.title} className="map-info-img" />
             )}
             <strong className="map-info-title">{active.title}</strong>
             <div className="map-info-rent">৳ {Number(active.monthlyRent).toLocaleString()}/mo</div>
