@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import ConfirmModal from '@/components/ConfirmModal';
 import { api, errMsg } from '@/lib/apiClient';
 
 const STATUSES = ['all', 'pending', 'approved', 'rejected', 'draft', 'rented', 'expired'];
@@ -49,6 +50,11 @@ export default function Moderation() {
   // Listing currently being rejected (drives the rejection-reason modal).
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
+  // Delete confirmation: a single listing, or the bulk flag for the selection.
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [selected, setSelected] = useState(() => new Set());
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -60,6 +66,7 @@ export default function Moderation() {
       const { data } = await api.get('/admin/listings/queue', { params });
       setListings(data.data.listings || []);
       setMeta(data.meta || null);
+      setSelected(new Set());
     } catch (err) {
       setError(errMsg(err));
     } finally {
@@ -109,6 +116,47 @@ export default function Moderation() {
     setRejectTarget(null);
     await applyModeration(target, false, reason);
     setRejectReason('');
+  };
+
+  const toggle = (id) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const allSelected = listings.length > 0 && selected.size === listings.length;
+  const toggleAll = () =>
+    setSelected(allSelected ? new Set() : new Set(listings.map((l) => l._id)));
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/admin/listings/${deleteTarget._id}`);
+      setDeleteTarget(null);
+      await load();
+    } catch (err) {
+      setError(errMsg(err));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const confirmBulkDelete = async () => {
+    const ids = [...selected];
+    if (!ids.length) return;
+    setDeleting(true);
+    try {
+      await api.post('/admin/listings/bulk-delete', { ids });
+      setBulkOpen(false);
+      await load();
+    } catch (err) {
+      setError(errMsg(err));
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const goTo = (p) => {
@@ -168,6 +216,11 @@ export default function Moderation() {
           />
           <button className="btn btn-primary">Search</button>
         </form>
+        {selected.size > 0 && (
+          <button className="btn btn-danger" onClick={() => setBulkOpen(true)}>
+            Delete selected ({selected.size})
+          </button>
+        )}
       </div>
 
       {error && <div className="alert error">{error}</div>}
@@ -186,6 +239,14 @@ export default function Moderation() {
         <table className="table">
           <thead>
             <tr>
+              <th style={{ width: 32 }}>
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleAll}
+                  aria-label="Select all listings"
+                />
+              </th>
               <th>Title</th>
               <th>Type</th>
               <th>Location</th>
@@ -200,6 +261,14 @@ export default function Moderation() {
           <tbody>
             {listings.map((l) => (
               <tr key={l._id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selected.has(l._id)}
+                    onChange={() => toggle(l._id)}
+                    aria-label={`Select ${l.title}`}
+                  />
+                </td>
                 <td>
                   <Link href={`/listings/${l.slug || l._id}`} target="_blank" rel="noreferrer">
                     {l.title}
@@ -231,6 +300,13 @@ export default function Moderation() {
                     onClick={() => reject(l)}
                   >
                     Reject
+                  </button>
+                  <button
+                    className="btn btn-ghost sm"
+                    disabled={busyId === l._id}
+                    onClick={() => setDeleteTarget(l)}
+                  >
+                    Delete
                   </button>
                 </td>
               </tr>
@@ -296,6 +372,32 @@ export default function Moderation() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="Delete listing?"
+        message={
+          deleteTarget
+            ? `"${deleteTarget.title}" will be permanently removed along with its images, and the owner will be notified. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        danger
+        busy={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => !deleting && setDeleteTarget(null)}
+      />
+
+      <ConfirmModal
+        open={bulkOpen}
+        title={`Delete ${selected.size} listing(s)?`}
+        message="The selected listings will be permanently removed along with their images, and their owners will be notified. This can't be undone."
+        confirmLabel={`Delete ${selected.size}`}
+        danger
+        busy={deleting}
+        onConfirm={confirmBulkDelete}
+        onCancel={() => !deleting && setBulkOpen(false)}
+      />
     </div>
   );
 }

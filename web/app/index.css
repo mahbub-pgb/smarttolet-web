@@ -84,6 +84,9 @@ small { display: block; margin-top: 4px; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 .btn-ghost:hover { background: #f0f3f1; }
+.btn-danger { background: #b3261e; color: #fff; }
+.btn-danger:hover { background: #931c16; }
+.btn-danger:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn.block { width: 100%; margin-top: 18px; }
 .btn.sm { padding: 5px 10px; font-size: 13px; margin-right: 6px; }
 a.btn:hover { text-decoration: none; }

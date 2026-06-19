@@ -16,6 +16,8 @@ export default function Settings() {
     smsSenderId: '',
     smsApiKey: '',
     smsApiKeyConfigured: false,
+    maxImagesPerListing: 5,
+    maxTotalKb: 0,
     pwSmsEnabled: false,
     pwSmsTemplate: '',
     maintenanceMode: false,
@@ -51,6 +53,8 @@ export default function Settings() {
           smsApiKey: '',
           // Admin endpoint masks the key as '***configured***' when one is set.
           smsApiKeyConfigured: !!s.sms?.apiKey,
+          maxImagesPerListing: s.uploadLimits?.maxImagesPerListing ?? 5,
+          maxTotalKb: s.uploadLimits?.maxTotalKb ?? 0,
           pwSmsEnabled: !!s.passwordChangeSms?.enabled,
           pwSmsTemplate: s.passwordChangeSms?.template || '',
           maintenanceMode: !!s.maintenanceMode,
@@ -76,6 +80,10 @@ export default function Settings() {
         listingExpiry: {
           value: Math.max(0, Number(form.listingExpiryValue) || 0),
           unit: form.listingExpiryUnit,
+        },
+        uploadLimits: {
+          maxImagesPerListing: Number(form.maxImagesPerListing) || 5,
+          maxTotalKb: Number(form.maxTotalKb) || 0,
         },
       };
       ['siteName', 'supportEmail', 'supportPhone', 'googleMapsApiKey', 'maintenanceMessage'].forEach(
@@ -118,6 +126,13 @@ export default function Settings() {
           onClick={() => setTab('general')}
         >
           General
+        </button>
+        <button
+          type="button"
+          className={`tab ${tab === 'uploads' ? 'active' : ''}`}
+          onClick={() => setTab('uploads')}
+        >
+          Uploads
         </button>
         <button
           type="button"
@@ -185,6 +200,32 @@ export default function Settings() {
 
             <label>Maintenance message</label>
             <textarea rows={3} value={form.maintenanceMessage} onChange={set('maintenanceMessage')} />
+          </>
+        )}
+
+        {tab === 'uploads' && (
+          <>
+            <label>Max images per listing</label>
+            <input
+              type="number"
+              min={1}
+              max={30}
+              value={form.maxImagesPerListing}
+              onChange={set('maxImagesPerListing')}
+            />
+            <small className="muted">How many images a user may attach to a single listing (1–30).</small>
+
+            <label style={{ marginTop: 14 }}>Max total upload size (KB)</label>
+            <input
+              type="number"
+              min={0}
+              value={form.maxTotalKb}
+              onChange={set('maxTotalKb')}
+            />
+            <small className="muted">
+              Combined size limit for all images in one listing. Set 0 for no total-size limit
+              (each image is still capped at 5 MB). Images are automatically compressed on upload.
+            </small>
           </>
         )}
 
