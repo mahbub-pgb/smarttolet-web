@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { apiGetWithMeta } from '@/lib/apiServer';
 import ListingCard from '@/components/ListingCard';
 import ListingFilters from '@/components/ListingFilters';
+import PageJump from '@/components/PageJump';
+import SmoothPageScroll from '@/components/SmoothPageScroll';
 
 export const revalidate = 60;
 
@@ -40,6 +42,7 @@ export default async function HomePage({ searchParams }) {
 
   return (
     <div className="container">
+      <SmoothPageScroll />
       <section className="hero">
         <h1>Find your next home in Bangladesh</h1>
         <p className="muted">Browse verified rental listings across the country.</p>
@@ -72,7 +75,7 @@ export default async function HomePage({ searchParams }) {
           {meta && meta.totalPages > 1 && (
             <nav className="pagination">
               {meta.hasPrevPage ? (
-                <Link className="btn btn-ghost sm" href={hrefForPage(searchParams, page - 1)}>
+                <Link className="btn btn-ghost sm" scroll={false} href={hrefForPage(searchParams, page - 1)}>
                   ← Prev
                 </Link>
               ) : (
@@ -85,6 +88,7 @@ export default async function HomePage({ searchParams }) {
                   <Link
                     key={p}
                     className={`btn sm ${p === meta.page ? 'btn-primary' : 'btn-ghost'}`}
+                    scroll={false}
                     href={hrefForPage(searchParams, p)}
                   >
                     {p}
@@ -92,11 +96,14 @@ export default async function HomePage({ searchParams }) {
                 ),
               )}
               {meta.hasNextPage ? (
-                <Link className="btn btn-ghost sm" href={hrefForPage(searchParams, page + 1)}>
+                <Link className="btn btn-ghost sm" scroll={false} href={hrefForPage(searchParams, page + 1)}>
                   Next →
                 </Link>
               ) : (
                 <span className="btn btn-ghost sm" aria-disabled>Next →</span>
+              )}
+              {meta.totalPages > 5 && (
+                <PageJump totalPages={meta.totalPages} currentPage={meta.page} />
               )}
             </nav>
           )}

@@ -431,6 +431,28 @@ a.directions-btn:hover {
   padding: 0 4px;
   color: var(--muted);
 }
+/* "Go to page" jump control in the pagination bar. */
+.page-jump {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+}
+.page-jump label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.page-jump input {
+  width: 62px;
+  padding: 6px 8px;
+  text-align: center;
+}
+.page-jump .muted {
+  font-size: 13px;
+  white-space: nowrap;
+}
 
 /* Filters */
 .filters {
