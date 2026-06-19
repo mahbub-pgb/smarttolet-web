@@ -26,10 +26,12 @@ export async function generateMetadata({ params }) {
 
   const description = (
     post.excerpt ||
+    post.contentHtml?.replace(/<[^>]+>/g, " ") ||
     post.blocks?.find((b) => b.type === "text")?.text ||
     ""
   )
     .replace(/\s+/g, " ")
+    .trim()
     .slice(0, 160);
   const url = `${SITE_URL}/blog/${post.slug || post._id}`;
   const image = post.coverImage?.url;
@@ -84,7 +86,7 @@ export default async function BlogPostPage({ params }) {
       </Link>
 
       <article className="blog-post">
-        {post.category?.name && <span className="badge">{post.category.name}</span>}
+        {post.category?.name && <span className="cat-badge">{post.category.name}</span>}
         <h1>{post.title}</h1>
         <div className="blog-post-meta muted">
           <span>{post.author?.fullName || "Staff"}</span>
@@ -96,7 +98,14 @@ export default async function BlogPostPage({ params }) {
           <img className="blog-cover" src={post.coverImage.url} alt={post.title} />
         )}
 
-        <BlockRenderer blocks={post.blocks || []} />
+        {post.contentHtml ? (
+          <div
+            className="blog-body ck-content"
+            dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+          />
+        ) : (
+          <BlockRenderer blocks={post.blocks || []} />
+        )}
 
         {post.tags?.length > 0 && (
           <div className="tag-row blog-tags">

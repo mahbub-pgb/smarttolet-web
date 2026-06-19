@@ -151,6 +151,15 @@
 .admin-area .block-img { max-width: 100%; max-height: 240px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px; display: block; }
 .admin-area .block input + input { margin-top: 8px; }
 
+/* CKEditor 5 — give the editable a sensible writing height. */
+.ck-wrap { margin: 6px 0; }
+.ck-loading { border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; color: var(--muted); background: #fafbfc; }
+.ck-editor__editable_inline { min-height: 340px; }
+/* CKEditor balloons/dialogs render at <body> level, so the app's global
+   `input { width:100% }` would stretch their fields — reset them here. */
+.ck.ck-input, .ck input.ck-input { width: auto; }
+.ck .ck-button { width: auto; }
+
 .admin-area .add-block-bar { display: flex; gap: 8px; margin: 12px 0 4px; }
 .admin-area .editor-actions { display: flex; align-items: center; gap: 10px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
 .admin-area .editor-actions .spacer { flex: 1; }
